@@ -1,0 +1,88 @@
+package cron
+
+import (
+	"context"
+	"database/sql"
+	"dmc-task/core"
+	"dmc-task/core/command"
+	"dmc-task/core/common"
+	"dmc-task/model/jobsflow"
+	"dmc-task/server"
+	"dmc-task/utils"
+	"github.com/google/uuid"
+	"github.com/zeromicro/go-zero/core/logx"
+	"strings"
+	"time"
+)
+
+func AddRealTimeTask(ctx context.Context, taskParam common.RealTimeSingleTask) (string, error) {
+	return addRealTimeTask(ctx, taskParam)
+}
+
+func addRealTimeTask(ctx context.Context, taskParam common.RealTimeSingleTask) (string, error) {
+	// 1、在流水任务中增加执行任务流水
+	if taskParam.ExtInfo == "" {
+		taskParam.ExtInfo = "{}"
+	}
+	taskId := uuid.New().String()
+	job := jobsflow.TJobsFlow{
+		Id:         taskId,
+		Type:       taskParam.Type,
+		BizCode:    taskParam.BizCode,
+		BizId:      taskParam.BizId,
+		ExecPath:   taskParam.ExecPath,
+		Param:      taskParam.Param,
+		Timeout:    taskParam.Timeout,
+		StartTime:  sql.NullTime{Time: utils.GetUTCTime(), Valid: true},
+		FinishTime: sql.NullTime{},
+		ResultMsg:  "{}",
+		ExtInfo:    taskParam.ExtInfo,
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(job.Timeout)*time.Second)
+	defer cancel()
+	go func() {
+		_ = execRealtime(job)
+	}()
+
+	// 插入t_jobs_flow表
+	mj := jobsflow.NewTJobsFlowModel(*server.SvrCtx.MysqlConn)
+	_, err := mj.Insert(ctx, &job)
+	if err != nil {
+		logx.Error(err)
+		return "", nil
+	}
+
+	return taskId, nil
+}
+
+func execRealtime(job jobsflow.TJobsFlow) error {
+	ctx := context.Background()
+
+	// 1、执行命令
+	var data []string
+	var status int64
+	var msg string
+	data, err := command.ExecCommand(ctx, job.Timeout, job.ExecPath, strings.Split(job.Param, " "))
+	if err != nil {
+		logx.Error(err)
+		status = int64(core.Failed)
+		msg = err.Error()
+	} else {
+		status = int64(core.Finished)
+		msg = core.TaskStatusMap[core.Finished]
+	}
+
+	// 2、更新任务状态
+	job.Status = status
+	job.FinishTime = sql.NullTime{Time: utils.GetUTCTime(), Valid: true}
+	job.ExecInterval = int64(job.FinishTime.Time.Sub(job.StartTime.Time).Seconds())
+	job.ResultMsg = core.GetResult(core.Success.Code, "", msg, core.TaskStatus(status), data)
+	mj := jobsflow.NewTJobsFlowModel(*server.SvrCtx.MysqlConn)
+	err = mj.Update(ctx, &job)
+	if err != nil {
+		logx.Error(err)
+		return nil
+	}
+	return nil
+}
