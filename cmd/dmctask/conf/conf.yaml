@@ -8,9 +8,15 @@ app:
   # 是否开启分布式，默认是 false，[true/false]
   is_distributed: false
 
-server:
+apiserver:
+  enabled: true
   host: 0.0.0.0
   port: 8888
+
+grpcserver:
+  enabled: true
+  host: 0.0.0.0
+  port: 8889
 
 logx:
   # 输出日志的模式，默认是 console, [console/file/volume]

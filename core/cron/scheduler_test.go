@@ -109,16 +109,18 @@ func TestRemoveCronTask(t *testing.T) {
 func TestAddFixedTimeTask(t *testing.T) {
 	newMysqlConn()
 	timewheel.Start()
-	taskParam := common.FixedTimeSingleTask{
-		Type:     int64(core.FixedTimeSingleTask),
-		BizCode:  "test",
-		BizId:    "1234567890",
-		ExecPath: "sleep",
-		Param:    "5",
-		ExecTime: utils.GetUTCTime().Add(time.Second * 65).Unix(),
-		Timeout:  10,
+	req := common.AddFixedTimeSingleTaskReq{
+		FixedTimeSingleTask: common.FixedTimeSingleTask{
+			Type:     int64(core.FixedTimeSingleTask),
+			BizCode:  "test",
+			BizId:    "1234567890",
+			ExecPath: "sleep",
+			Param:    "5",
+			ExecTime: utils.GetUTCTime().Add(time.Second * 65).Unix(),
+			Timeout:  10,
+		},
 	}
-	taskId, err := AddFixedTimeTask(context.Background(), &taskParam)
+	taskId, err := AddDataToCronTasks(context.Background(), &req)
 	if err != nil {
 		t.Error(err)
 	}

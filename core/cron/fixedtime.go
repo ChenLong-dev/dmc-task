@@ -20,34 +20,12 @@ import (
 	"time"
 )
 
-const (
-	FixCycleSpec  = "@every 1m"      // 每分钟扫描一次数据库
-	FixedScanTime = 65 * time.Second // 扫描最近65秒内将要执行的任务
-)
-
-func AddFixedTimeTask(ctx context.Context, req *common.FixedTimeSingleTask) (taskId string, err error) {
-	return addFixedTimeSingleTaskForReq(ctx, req)
-}
-
-// 添加定时循环扫描任务（）
-func addCronCycleTaskOfFixTimeTasks() error {
-	logx.Debug("添加固定时间任务scheduler")
-	addFixedTimeSingleTasksFromDB()
-	entryId, err := c.AddFunc(FixCycleSpec, addFixedTimeSingleTasksFromDB)
-	if err != nil {
-		logx.Info("add FixTimeSingleTasks: ", err)
-		return err
-	}
-	logx.Infof("[add CronCycleTasks] spec:%s, entryId: %d", FixCycleSpec, entryId)
-	return nil
-}
-
 // 从DB中添加固定时间任务
 func addFixedTimeSingleTasksFromDB() {
 	ctx := context.Background()
 	mc := crontasks.NewTCronTasksModel(*server.SvrCtx.MysqlConn)
 	mj := jobsflow.NewTJobsFlowModel(*server.SvrCtx.MysqlConn)
-	results, err := mc.GetCronTasksByStatus(ctx, int64(core.Init), FixedScanTime)
+	results, err := mc.GetCronTasksByStatus(ctx, int64(core.Init), core.FixedScanTime)
 	if err != nil {
 		if errors.Is(err, crontasks.ErrNotFound) {
 			logx.Debugf("[addFixTimeSingleTasks] task not found")
@@ -244,4 +222,98 @@ func updateRecord(ctx context.Context, taskParam jobsflow.TJobsFlow) error {
 		return err
 	}
 	return nil
+}
+
+///////////////////////////////////////////////////////////////////////
+// 固定定时任务相关
+
+// AddDataToCronTasks 向数据库中添加定时任务
+func AddDataToCronTasks(ctx context.Context, req *common.AddFixedTimeSingleTaskReq) (taskId string, err error) {
+	m := crontasks.NewTCronTasksModel(*server.SvrCtx.MysqlConn)
+	if req.ExtInfo == "" {
+		req.ExtInfo = "{}"
+	}
+	taskId = uuid.New().String()
+	_, err = m.Insert(ctx, &crontasks.TCronTasks{
+		Id:         taskId,
+		Type:       req.Type,
+		BizCode:    req.BizCode,
+		BizId:      req.BizId,
+		ExecPath:   req.ExecPath,
+		Param:      req.Param,
+		Timeout:    req.Timeout,
+		StartTime:  sql.NullTime{},
+		FinishTime: sql.NullTime{},
+		ExecTime:   utils.GetTime(req.ExecTime),
+		ResultMsg:  "{}",
+		ExtInfo:    req.ExtInfo,
+	})
+	if err != nil {
+		logx.Error(err)
+		return
+	}
+	logx.Infof("[add fixedtime task to db], task is %s", taskId)
+	return taskId, nil
+}
+
+// DelDataFromCronTasks 从定时任务中删除数据
+func DelDataFromCronTasks(ctx context.Context, req *common.DelFixedTimeSingleTaskReq) (err error) {
+	m := crontasks.NewTCronTasksModel(*server.SvrCtx.MysqlConn)
+	// 1、根据id查找任务是否存在
+	result, err := m.FindOne(ctx, req.Id)
+	if err != nil {
+		logx.Error(err)
+		return
+	}
+	// 2、校验时间（执行时间要大于1m前）
+	execTime := result.ExecTime
+	now := utils.GetUTCTime().Add(time.Second * 60)
+	internal := execTime.Sub(now)
+	if internal < 0 {
+		err = fmt.Errorf("exec time must be later 60s than current time, current time is %s, exec time is %s, internal:%ds",
+			now.Format(time.DateTime), execTime.Format(time.DateTime), internal)
+		return
+	}
+	// 3、删除任务
+	err = m.Delete(ctx, req.Id)
+	if err != nil {
+		logx.Error(err)
+		return
+	}
+	logx.Infof("delete cron task success, task is %+v", result)
+	return
+}
+
+// QueryDataFromCronTasks 从定时任务中查询数据
+func QueryDataFromCronTasks(ctx context.Context, req *common.QueryFixedTimeSingleTaskReq) (results []*crontasks.TCronTasks, err error) {
+	m := crontasks.NewTCronTasksModel(*server.SvrCtx.MysqlConn)
+	if req.Id != "" {
+		var result = &crontasks.TCronTasks{}
+		result, err = m.FindOne(ctx, req.Id)
+		if err != nil {
+			logx.Error(err)
+			return
+		}
+		results = append(results, result)
+		return
+	}
+
+	if req.Status < 0 || req.Status > int64(core.Finished) {
+		err = errors.New("status is error")
+		logx.Error(err)
+		return
+	}
+	if req.TimeHorizon == 0 {
+		req.TimeHorizon = core.DefaultTimeHorizon
+	}
+	if req.Limit == 0 {
+		req.Limit = core.DefaultLimit
+	}
+	logx.Debugf("req:%+v", req)
+	results, err = m.GetCronTasksByStatus2(ctx, req.Status, req.TimeHorizon, req.Limit)
+	if err != nil {
+		logx.Error(err)
+		return
+	}
+	return
 }

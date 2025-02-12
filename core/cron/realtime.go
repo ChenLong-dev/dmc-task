@@ -9,6 +9,7 @@ import (
 	"dmc-task/model/jobsflow"
 	"dmc-task/server"
 	"dmc-task/utils"
+	"errors"
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 	"strings"
@@ -85,4 +86,40 @@ func execRealtime(job jobsflow.TJobsFlow) error {
 		return nil
 	}
 	return nil
+}
+
+///////////////////////////////////////////////////////////////////////
+// 实时单任务相关
+
+// QueryDataFromJobsFlow 从JobsFlow表中查询数据
+func QueryDataFromJobsFlow(ctx context.Context, req *common.QueryRealTimeSingleTaskReq) (results []*jobsflow.TJobsFlow, err error) {
+	m := jobsflow.NewTJobsFlowModel(*server.SvrCtx.MysqlConn)
+	if req.Id != "" {
+		var result = &jobsflow.TJobsFlow{}
+		result, err = m.FindOne(ctx, req.Id)
+		if err != nil {
+			logx.Error(err)
+			return
+		}
+		results = append(results, result)
+		return
+	}
+	if req.Status < 0 || req.Status > int64(core.Finished) {
+		err = errors.New("status is error")
+		logx.Error(err)
+		return
+	}
+	if req.TimeHorizon == 0 {
+		req.TimeHorizon = core.DefaultTimeHorizon
+	}
+	if req.Limit == 0 {
+		req.Limit = core.DefaultLimit
+	}
+	logx.Debugf("req:%+v", req)
+	results, err = m.GetJobsFlowByStatus2(ctx, req.Status, req.TimeHorizon, req.Limit)
+	if err != nil {
+		logx.Error(err)
+		return
+	}
+	return
 }

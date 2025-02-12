@@ -2,6 +2,7 @@ package main
 
 import (
 	internal "dmc-task/cmd/dmctask/api"
+	"dmc-task/cmd/dmctask/grpc"
 	core "dmc-task/core"
 	"dmc-task/core/cron"
 	"dmc-task/core/gracefulstop"
@@ -11,9 +12,10 @@ import (
 	"fmt"
 	"time"
 
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/zeromicro/go-zero/core/logx"
-	"os"
 )
 
 var cfgPath string
@@ -37,22 +39,34 @@ var serverCmd = &cobra.Command{
 		// 初始化日志（logx）
 		logxInit()
 
-		// 初始化服务
+		// 初始化数据库
 		_ = server.NewServiceContext(core.Cfg)
 		model.InitMysql()
+
+		// 初始化分布式锁
 		_ = model.Reset()
 		if model.Lock() {
 			logx.Infof("this server is master, source:%s", server.SvrCtx.IsMasterSource)
-			timewheel.Start() // 启动时间轮（只有master才启动）
+			// 启动时间轮（只有master才启动）
+			timewheel.Start()
 		} else {
 			logx.Info("this server is slave!")
 		}
-		cron.Start() // 初始化定时任务
+
+		// 初始化定时任务
+		cron.Start()
 		logx.Debugf("cfg:%+v", core.Cfg)
 
-		// 开始服务
-		gracefulstop.GracefulShutdown()
-		internal.Run(core.Cfg)
+		// 初始化服务
+		stop := make(chan bool, 1)
+		gracefulstop.GracefulShutdown(stop)
+		go grpc.Run(core.Cfg)
+		go internal.Run(core.Cfg)
+		select {
+		case <-stop:
+			logx.Info("dmc-task is closed!")
+			os.Exit(0)
+		}
 	},
 }
 

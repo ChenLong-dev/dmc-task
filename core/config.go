@@ -2,9 +2,10 @@ package core
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 var Cfg *Config
@@ -14,10 +15,11 @@ const (
 )
 
 type Config struct {
-	App    AppConfig    `mapstructure:"app"`
-	Server ServerConfig `mapstructure:"server"`
-	Logx   LogxConfig   `mapstructure:"logx"`
-	MySQL  MySqlConfig  `mapstructure:"mysql"`
+	App        AppConfig        `mapstructure:"app"`
+	ApiServer  ApiServerConfig  `mapstructure:"apiserver"`
+	GrpcServer GrpcServerConfig `mapstructure:"grpcserver"`
+	Logx       LogxConfig       `mapstructure:"logx"`
+	MySQL      MySqlConfig      `mapstructure:"mysql"`
 }
 
 type AppConfig struct {
@@ -27,9 +29,16 @@ type AppConfig struct {
 	IsDistributed bool   `mapstructure:"is_distributed"`
 }
 
-type ServerConfig struct {
-	Host string `mapstructure:"host"`
-	Port int    `mapstructure:"port"`
+type ApiServerConfig struct {
+	Enabled bool   `mapstructure:"enabled"`
+	Host    string `mapstructure:"host"`
+	Port    int    `mapstructure:"port"`
+}
+
+type GrpcServerConfig struct {
+	Enabled bool   `mapstructure:"enabled"`
+	Host    string `mapstructure:"host"`
+	Port    int    `mapstructure:"port"`
 }
 
 type LogxConfig struct {

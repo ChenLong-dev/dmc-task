@@ -8,9 +8,10 @@ import (
 	"dmc-task/server"
 	"dmc-task/utils"
 	"fmt"
+	"time"
+
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"time"
 )
 
 func InitMysql() {
@@ -50,7 +51,13 @@ func NewMysql(username, password, host, database string, port int) (*sqlx.SqlCon
 }
 
 func Lock() bool {
-	source := fmt.Sprintf("%s-%s:%d", utils.GetLocalIP(), server.SvrCtx.Config.Server.Host, server.SvrCtx.Config.Server.Port)
+	var source string
+	if server.SvrCtx.Config.ApiServer.Enabled {
+		source = fmt.Sprintf("%s-%s:%d", utils.GetLocalIP(), server.SvrCtx.Config.ApiServer.Host, server.SvrCtx.Config.ApiServer.Port)
+	} else {
+		source = fmt.Sprintf("%s-%s:%d", utils.GetLocalIP(), server.SvrCtx.Config.GrpcServer.Host, server.SvrCtx.Config.GrpcServer.Port)
+	}
+
 	if ok := lock.NewTDistributedLocksModel(*server.SvrCtx.MysqlConn).Lock(source); !ok {
 		return false
 	}

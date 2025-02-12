@@ -2,6 +2,7 @@ package internal
 
 import (
 	"dmc-task/core"
+
 	"github.com/zeromicro/go-zero/core/logx"
 
 	"dmc-task/cmd/dmctask/api/internal/config"
@@ -11,16 +12,22 @@ import (
 	"github.com/zeromicro/go-zero/rest"
 )
 
+var ApiServer *rest.Server
+
 func Run(conf *core.Config) {
+	logx.Debug("Api server starting ...")
+	if !conf.ApiServer.Enabled {
+		logx.Infof("Api Server is not enabled, exit. conf: %+v", conf.ApiServer)
+		return
+	}
 	var c config.Config
-	c.RestConf.Host = conf.Server.Host
-	c.RestConf.Port = conf.Server.Port
-	server := rest.MustNewServer(c.RestConf)
-	defer server.Stop()
+	c.RestConf.Host = conf.ApiServer.Host
+	c.RestConf.Port = conf.ApiServer.Port
+	ApiServer = rest.MustNewServer(c.RestConf)
 
 	ctx := svc.NewServiceContext(c)
-	handler.RegisterHandlers(server, ctx)
+	handler.RegisterHandlers(ApiServer, ctx)
 
-	logx.Infof("Starting server at %s:%d...", c.Host, c.Port)
-	server.Start()
+	logx.Infof("Starting api server at %s:%d...", c.Host, c.Port)
+	ApiServer.Start()
 }

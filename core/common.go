@@ -2,6 +2,7 @@ package core
 
 import (
 	"dmc-task/utils"
+	"time"
 )
 
 // TaskType 定义任务类型
@@ -24,15 +25,17 @@ var TaskTypeMap = map[TaskType]string{
 type TaskStatus int
 
 const (
-	Added    TaskStatus = -3   // -3 - 已添加
-	Modified TaskStatus = -2   // -2 - 已修改
-	Deleted  TaskStatus = -1   // -1 - 已删除
+	Added    TaskStatus = -3 // -3 - 已添加
+	Modified TaskStatus = -2 // -2 - 已修改
+	Deleted  TaskStatus = -1 // -1 - 已删除
+)
+
+const (
 	Init     TaskStatus = iota // 0 - 初始化
 	Pending                    // 1 - 待执行
 	Running                    // 2 - 执行中
 	Failed                     // 3 - 失败
 	Finished                   // 4 - 已完成
-
 )
 
 var TaskStatusMap = map[TaskStatus]string{
@@ -42,6 +45,16 @@ var TaskStatusMap = map[TaskStatus]string{
 	Failed:   "失败",
 	Finished: "已完成",
 }
+
+const (
+	DefaultLimit       = 500
+	DefaultTimeHorizon = 1
+)
+
+const (
+	FixCycleSpec  = "@every 1m"      // 每分钟扫描一次数据库
+	FixedScanTime = 65 * time.Second // 扫描最近65秒内将要执行的任务
+)
 
 type Result struct {
 	Code   int         `json:"code"`   // 错误码

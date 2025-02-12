@@ -79,46 +79,6 @@ func TestInsertJobsFlow(t *testing.T) {
 	}
 }
 
-//func TestFindAndUpdateCronTasks(t *testing.T) {
-//	m := crontasks.NewTCronTasksModel(*newMysqlConn())
-//	for {
-//		result, err := m.GetCronTaskByStatus(context.Background(), int64(core.Pending))
-//		if err != nil {
-//			if err == crontasks.ErrNotFound {
-//				t.Log("no pending task found, sleep 1 seconds")
-//				time.Sleep(time.Second * 1)
-//				continue
-//			}
-//			t.Error(err)
-//			return
-//		}
-//		t.Logf("%+v", result)
-//
-//		result.StartTime = sql.NullTime{utils.GetUTCTime(), true}
-//		result.Status = int64(core.Running)
-//		result.ResultMsg = "{\"result\": \"进行中....\"}"
-//
-//		err = m.Update(context.Background(), result)
-//		if err != nil {
-//			t.Error(err)
-//		}
-//		t.Logf("update success! %+v", result)
-//		time.Sleep(1 * time.Second)
-//
-//		now := utils.GetUTCTime()
-//		result.FinishTime = sql.NullTime{now, true}
-//		result.Status = int64(core.Finished)
-//		result.ExecInterval = int64(now.Sub(result.StartTime.Time).Seconds())
-//		result.ResultMsg = "{\"result\": \"已完成....\"}"
-//
-//		err = m.Update(context.Background(), result)
-//		if err != nil {
-//			t.Error(err)
-//		}
-//		t.Logf("update success! %+v", result)
-//	}
-//}
-
 func TestGetAndUpdateCronTasksAndJobsFlow(t *testing.T) {
 	conn := newMysqlConn()
 	cleanAll(conn)

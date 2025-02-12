@@ -7,9 +7,7 @@ import (
 	"dmc-task/core/common"
 	"dmc-task/core/cron"
 	"dmc-task/model/croncycletasks"
-	"dmc-task/server"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -38,13 +36,13 @@ func AddCronCycle(ctx context.Context, req *common.AddCronCycleTaskReq) (resp *c
 	}
 
 	// 2、检查是否已添加过定时任务
-	err = checkCronCycle(ctx, req)
+	err = cron.CheckCronCycle(ctx, req)
 	if err != nil {
 		logx.Error(err)
 		return
 	}
 	// 3、添加任务（入库）
-	taskId, err = addDataToDB(ctx, 0, req)
+	taskId, err = cron.AddDataToCronCycleTask(ctx, 0, req)
 	if err != nil {
 		logx.Error(err)
 		return
@@ -74,7 +72,7 @@ func DelCronCycle(ctx context.Context, req *common.DelCronCycleTaskReq) (resp *c
 	}
 
 	// 2、删除定时任务
-	entryId, err = removeCronCycleTask(ctx, req.Id)
+	entryId, err = cron.DelDataFromCronCycleTask(ctx, req.Id)
 	if err != nil {
 		return
 	}
@@ -103,7 +101,7 @@ func ModCronCycle(ctx context.Context, req *common.ModCronCycleTaskReq) (resp *c
 	}
 
 	// 2、修改定时任务
-	entryId, err = modCronCycleTask(ctx, req)
+	entryId, err = cron.ModDataFromCronCycleTask(ctx, req)
 	if err != nil {
 		return
 	}
@@ -126,7 +124,7 @@ func QueryCronCycle(ctx context.Context, req *common.QueryCronCycleTaskReq) (res
 
 	// 1、查询定时任务
 	var results []*croncycletasks.TCronCycleTasks
-	results, err = queryCronCycleTask(ctx, req)
+	results, err = cron.QueryDataFromCronCycleTask(ctx, req)
 	if err != nil {
 		logx.Error(err)
 		return
@@ -148,164 +146,6 @@ func QueryCronCycle(ctx context.Context, req *common.QueryCronCycleTaskReq) (res
 				ExtInfo:  v.ExtInfo,
 			},
 		})
-	}
-	return
-}
-
-// ----------------- 私有函数 -----------------
-func checkCronCycle(ctx context.Context, req *common.AddCronCycleTaskReq) (err error) {
-	m := croncycletasks.NewTCronCycleTasksModel(*server.SvrCtx.MysqlConn)
-	result, err := m.GetCronTaskByBizCodeAndType(ctx, req.Type, req.BizCode)
-	if err != nil {
-		if errors.Is(err, croncycletasks.ErrNotFound) {
-			return nil
-		}
-		logx.Error(err)
-		return
-	}
-	if result != nil {
-		err = errors.New("cron cycle task already exists")
-		logx.Error(err)
-		return
-	}
-	return
-}
-
-func addDataToDB(ctx context.Context, id int64, req *common.AddCronCycleTaskReq) (taskId string, err error) {
-	m := croncycletasks.NewTCronCycleTasksModel(*server.SvrCtx.MysqlConn)
-	if req.ExtInfo == "" {
-		req.ExtInfo = "{}"
-	}
-	taskId = uuid.New().String()
-	_, err = m.Insert(ctx, &croncycletasks.TCronCycleTasks{
-		Id:       taskId,
-		EntryId:  id,
-		Type:     req.Type,
-		BizCode:  req.BizCode,
-		Cron:     req.Cron,
-		ExecPath: req.ExecPath,
-		Param:    req.Param,
-		Status:   int64(core.Added),
-		Timeout:  req.Timeout,
-		ExtInfo:  req.ExtInfo,
-	})
-	if err != nil {
-		logx.Error(err)
-		return
-	}
-	return
-}
-
-func removeCronCycleTask(ctx context.Context, id string) (entryId int64, err error) {
-	m := croncycletasks.NewTCronCycleTasksModel(*server.SvrCtx.MysqlConn)
-	// 1、通过id从数据库中获取任务信息
-	result, err := m.GetCronTaskById(ctx, id)
-	if err != nil {
-		if errors.Is(err, croncycletasks.ErrNotFound) {
-			return entryId, errors.New("task not found")
-		}
-		logx.Error(err)
-		return
-	}
-	entryId = result.EntryId
-	cron.RemoveTask(result.EntryId)
-	result.Status = int64(core.Deleted)
-	// 3、更新数据库中的任务信息
-	err = m.Update(ctx, result)
-	if err != nil {
-		logx.Error(err)
-		return
-	}
-	return
-}
-
-func modCronCycleTask(ctx context.Context, req *common.ModCronCycleTaskReq) (entryId int64, err error) {
-	m := croncycletasks.NewTCronCycleTasksModel(*server.SvrCtx.MysqlConn)
-	// 1、通过id从数据库中获取任务信息
-	result, err := m.GetCronTaskById(ctx, req.Id)
-	if err != nil {
-		if errors.Is(err, croncycletasks.ErrNotFound) {
-			return 0, errors.New("task not found")
-		}
-		logx.Error(err)
-		return
-	}
-	entryId = result.EntryId
-	// 2、检查参数
-	if req.Type <= 0 || req.Type != int64(core.CronCycleTask) {
-		err = errors.New("type is not cron cycle task")
-		logx.Error(err)
-		return
-	}
-	if req.BizCode != result.BizCode || req.Type != result.Type {
-		err = errors.New("biz code or type is not match")
-		logx.Error(err)
-		return
-	}
-	if req.Cron != "" {
-		result.Cron = req.Cron
-	}
-	if req.ExecPath != "" {
-		result.ExecPath = req.ExecPath
-	}
-	if req.Param != "" {
-		result.Param = req.Param
-	}
-	if req.Timeout != 0 {
-		if req.Timeout < 0 {
-			result.Timeout = command.DefaultTimeout
-		} else {
-			result.Timeout = req.Timeout
-		}
-	}
-	if req.ExtInfo != "" {
-		result.ExtInfo = req.ExtInfo
-	}
-
-	// 3、修改数据库中的任务信息
-	err = m.Update(ctx, &croncycletasks.TCronCycleTasks{
-		Id:       result.Id,
-		EntryId:  entryId,
-		Type:     result.Type,
-		BizCode:  result.BizCode,
-		Cron:     result.Cron,
-		ExecPath: result.ExecPath,
-		Param:    result.Param,
-		Timeout:  result.Timeout,
-		Status:   int64(core.Modified),
-		ExtInfo:  result.ExtInfo,
-	})
-	if err != nil {
-		logx.Error(err)
-		return
-	}
-	// 4、返回修改的任务id
-	return
-}
-
-func queryCronCycleTask(ctx context.Context, req *common.QueryCronCycleTaskReq) (results []*croncycletasks.TCronCycleTasks, err error) {
-	logx.Debugf("queryCronCycleTask req: %v", req.Id)
-	m := croncycletasks.NewTCronCycleTasksModel(*server.SvrCtx.MysqlConn)
-	if req.Id == "" {
-		results, err = m.GetCronTasks(ctx)
-		if err != nil {
-			if errors.Is(err, croncycletasks.ErrNotFound) {
-				return nil, errors.New("tasks not found")
-			}
-			logx.Error(err)
-			return
-		}
-	} else {
-		var result *croncycletasks.TCronCycleTasks
-		result, err = m.GetCronTaskById(ctx, req.Id)
-		if err != nil {
-			if errors.Is(err, croncycletasks.ErrNotFound) {
-				return nil, errors.New("task not found")
-			}
-			logx.Error(err)
-			return
-		}
-		results = append(results, result)
 	}
 	return
 }

@@ -1,6 +1,7 @@
 package cron
 
 import (
+	"dmc-task/core"
 	"dmc-task/core/common"
 	"dmc-task/core/timewheel"
 	"dmc-task/model"
@@ -116,13 +117,13 @@ func AddLockTask() error {
 
 func addCronScanFromDBTask() error {
 	addCronScanFromDB()
-	entryId, err := c.AddFunc(FixCycleSpec, addCronScanFromDB)
+	entryId, err := c.AddFunc(core.FixCycleSpec, addCronScanFromDB)
 	if err != nil {
 		logx.Info("add CronScanFromDBTask: ", err)
 		return err
 	}
 
-	logx.Infof("[add CronScanFromDBTask] spec:%s, entryId: %d", FixCycleSpec, entryId)
+	logx.Infof("[add CronScanFromDBTask] spec:%s, entryId: %d", core.FixCycleSpec, entryId)
 	return nil
 }
 
