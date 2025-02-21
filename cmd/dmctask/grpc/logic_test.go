@@ -70,3 +70,18 @@ func TestQueryRealTimeSingleTask(t *testing.T) {
 	}
 	t.Logf("resp:%+v", resp)
 }
+
+func TestStartOrStopCronCycleTask(t *testing.T) {
+	conn := getConn()
+	defer closeConn(conn)
+
+	client := protoc.NewTaskClient(conn)
+	resp, err := client.StartOrStopCronCycleTask(context.Background(), &protoc.StartOrStopCronCycleTaskReq{
+		Id:      "bf8d34ae-9865-4965-ab9e-d186b42b1e9c",
+		IsStart: false,
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	t.Logf("resp:%+v", resp)
+}

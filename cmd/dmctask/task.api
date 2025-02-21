@@ -43,6 +43,12 @@ type ModCronCycleTaskReq {
 	CronCycleTask
 }
 
+// 启停：启停定时循环任务请求
+type StartOrStopCronCycleTaskReq {
+	Id      string `json:"id" validate:"required"`
+	IsStart bool   `json:"is_start"`
+}
+
 // 查询：查询定时循环任务请求
 type QueryCronCycleTaskReq {
 	Id string `json:"id,optional"`
@@ -185,6 +191,9 @@ service task-api {
 
 	@handler modCronCycle
 	post /cycle/mod (ModCronCycleTaskReq) returns (Response)
+
+	@handler startorstopCronCycle
+	post /cycle/startorstop (StartOrStopCronCycleTaskReq) returns (Response)
 
 	@handler queryCronCycle
 	post /cycle/query (QueryCronCycleTaskReq) returns (QueryTaskConfigResp)

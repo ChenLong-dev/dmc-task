@@ -88,7 +88,7 @@ func TestRemoveCronTask(t *testing.T) {
 	}
 	t.Logf("id1:%d, id2:%d", id1, id2)
 	time.Sleep(time.Second * 5)
-	RemoveTask(id1)
+	RemoveTask(context.Background(), id1)
 	taskParam.Cron = "*/2 * * * * *"
 	id3, err := AddTask(taskParam)
 	if err != nil {

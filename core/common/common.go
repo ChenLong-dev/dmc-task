@@ -142,3 +142,8 @@ type RealTimeSingleTaskData struct {
 type Response struct {
 	Base
 }
+
+type StartOrStopCronCycleTaskReq struct {
+	Id      string `json:"id" validate:"required"`
+	IsStart bool   `json:"is_start"`
+}

@@ -51,35 +51,6 @@ func addFixedTimeSingleTasksFromDB() {
 	}
 }
 
-// 从REQ中添加固定时间任务
-func addFixedTimeSingleTaskForReq(ctx context.Context, req *common.FixedTimeSingleTask) (taskId string, err error) {
-	m := crontasks.NewTCronTasksModel(*server.SvrCtx.MysqlConn)
-	if req.ExtInfo == "" {
-		req.ExtInfo = "{}"
-	}
-	taskId = uuid.New().String()
-	_, err = m.Insert(ctx, &crontasks.TCronTasks{
-		Id:         taskId,
-		Type:       req.Type,
-		BizCode:    req.BizCode,
-		BizId:      req.BizId,
-		ExecPath:   req.ExecPath,
-		Param:      req.Param,
-		Timeout:    req.Timeout,
-		StartTime:  sql.NullTime{},
-		FinishTime: sql.NullTime{},
-		ExecTime:   utils.GetTime(req.ExecTime),
-		ResultMsg:  req.ExtInfo,
-		ExtInfo:    req.ExtInfo,
-	})
-	if err != nil {
-		logx.Error(err)
-		return
-	}
-	logx.Infof("[add fixedtime task to db], task is %s", taskId)
-	return taskId, nil
-}
-
 func pendingFixedTimeSingleTaskFromDB(cronTask *crontasks.TCronTasks) error {
 	ctx := context.Background()
 	// 1、在流水任务中增加执行任务流水
@@ -249,10 +220,10 @@ func AddDataToCronTasks(ctx context.Context, req *common.AddFixedTimeSingleTaskR
 		ExtInfo:    req.ExtInfo,
 	})
 	if err != nil {
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		return
 	}
-	logx.Infof("[add fixedtime task to db], task is %s", taskId)
+	logx.WithContext(ctx).Infof("[add fixedtime task to db], task is %s", taskId)
 	return taskId, nil
 }
 
@@ -262,7 +233,7 @@ func DelDataFromCronTasks(ctx context.Context, req *common.DelFixedTimeSingleTas
 	// 1、根据id查找任务是否存在
 	result, err := m.FindOne(ctx, req.Id)
 	if err != nil {
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		return
 	}
 	// 2、校验时间（执行时间要大于1m前）
@@ -272,6 +243,7 @@ func DelDataFromCronTasks(ctx context.Context, req *common.DelFixedTimeSingleTas
 	if internal < 0 {
 		err = fmt.Errorf("exec time must be later 60s than current time, current time is %s, exec time is %s, internal:%ds",
 			now.Format(time.DateTime), execTime.Format(time.DateTime), internal)
+		logx.WithContext(ctx).Error(err)
 		return
 	}
 	// 3、删除任务
@@ -280,7 +252,7 @@ func DelDataFromCronTasks(ctx context.Context, req *common.DelFixedTimeSingleTas
 		logx.Error(err)
 		return
 	}
-	logx.Infof("delete cron task success, task is %+v", result)
+	logx.WithContext(ctx).Infof("delete cron task success, task is %+v", result)
 	return
 }
 
@@ -291,16 +263,17 @@ func QueryDataFromCronTasks(ctx context.Context, req *common.QueryFixedTimeSingl
 		var result = &crontasks.TCronTasks{}
 		result, err = m.FindOne(ctx, req.Id)
 		if err != nil {
-			logx.Error(err)
+			logx.WithContext(ctx).Error(err)
 			return
 		}
 		results = append(results, result)
 		return
 	}
+	ctx = logx.ContextWithFields(ctx, logx.Field("id", req.Id))
 
 	if req.Status < 0 || req.Status > int64(core.Finished) {
 		err = errors.New("status is error")
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		return
 	}
 	if req.TimeHorizon == 0 {
@@ -312,7 +285,7 @@ func QueryDataFromCronTasks(ctx context.Context, req *common.QueryFixedTimeSingl
 	logx.Debugf("req:%+v", req)
 	results, err = m.GetCronTasksByStatus2(ctx, req.Status, req.TimeHorizon, req.Limit)
 	if err != nil {
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		return
 	}
 	return

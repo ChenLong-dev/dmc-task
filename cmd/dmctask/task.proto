@@ -46,6 +46,12 @@ message ModCronCycleTaskReq {
   CronCycleTask task = 2;
 }
 
+// 启停：修改定时循环任务启停状态请求
+message StartOrStopCronCycleTaskReq {
+  string id = 1;
+  bool is_start = 2;
+}
+
 // 查询：查询定时循环任务请求
 message QueryCronCycleTaskReq {
   string id = 1;
@@ -151,6 +157,7 @@ service Task {
   rpc AddCronCycleTask (AddCronCycleTaskReq) returns (Response);
   rpc DelCronCycleTask (DelCronCycleTaskReq) returns (Response);
   rpc ModCronCycleTask (ModCronCycleTaskReq) returns (Response);
+  rpc StartOrStopCronCycleTask (StartOrStopCronCycleTaskReq) returns (Response);
   rpc QueryCronCycleTask (QueryCronCycleTaskReq) returns (QueryCronCycleTaskResp);
 
   // 固定时间单任务

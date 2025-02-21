@@ -29,11 +29,11 @@ func execCommand(ctx context.Context, timeout int64, commandName string, params 
 	}()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		return
 	}
 	cmdStr := fmt.Sprintf("%s %s", commandName, strings.Join(cmd.Args, " "))
-	logx.Debugf("pid:%d, command:%s, output:%s", cmd.Process.Pid, cmdStr, string(output))
+	logx.WithContext(ctx).Debugf("pid:%d, command:%s, output:%s", cmd.Process.Pid, cmdStr, string(output))
 	data = strings.Split(string(output), "\n")
 	return data, nil
 }

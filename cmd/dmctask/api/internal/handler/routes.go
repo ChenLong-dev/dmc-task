@@ -38,6 +38,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/cycle/query",
 				Handler: croncycletask.QueryCronCycleHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/cycle/startorstop",
+				Handler: croncycletask.StartorstopCronCycleHandler(serverCtx),
+			},
 		},
 		rest.WithPrefix("/v1"),
 	)

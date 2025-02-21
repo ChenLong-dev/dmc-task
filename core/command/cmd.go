@@ -20,10 +20,10 @@ func ExecCommand(ctx context.Context, timeout int64, commandName string, params 
 	case "linux":
 		data, err = execCommand(ctx, timeout, commandName, params)
 	default:
-		logx.Error("not support os")
+		logx.WithContext(ctx).Error("not support os")
 	}
 	if err != nil {
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		return
 	}
 

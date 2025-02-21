@@ -25,6 +25,7 @@ var TaskTypeMap = map[TaskType]string{
 type TaskStatus int
 
 const (
+	Stoped   TaskStatus = -4 // -4 - 已暂停
 	Added    TaskStatus = -3 // -3 - 已添加
 	Modified TaskStatus = -2 // -2 - 已修改
 	Deleted  TaskStatus = -1 // -1 - 已删除

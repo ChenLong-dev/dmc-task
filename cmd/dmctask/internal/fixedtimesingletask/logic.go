@@ -25,10 +25,12 @@ func AddCron(ctx context.Context, req *common.AddFixedTimeSingleTaskReq) (resp *
 			resp.Msg = fmt.Sprintf("%s, task id is %s", core.Success.Msg, taskId)
 		}
 	}()
+	ctx = logx.ContextWithFields(ctx, logx.Field("biz_code", req.BizCode), logx.Field("biz_id", req.BizId))
+
 	// 1、格式校验
 	if req.Type != int64(core.FixedTimeSingleTask) {
 		err = errors.New("type is not fixed time task")
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		return
 	}
 
@@ -38,12 +40,13 @@ func AddCron(ctx context.Context, req *common.AddFixedTimeSingleTaskReq) (resp *
 	if internal < 0 {
 		err = fmt.Errorf("exec time must be later 60s than current time, current time is %s, exec time is %s, internal:%ds",
 			now.Format(time.DateTime), execTime.Format(time.DateTime), internal)
+		logx.WithContext(ctx).Error(err)
 		return
 	}
 	// 2、添加任务（入库）
 	taskId, err = cron.AddDataToCronTasks(ctx, req)
 	if err != nil {
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		return
 	}
 	// 3、返回响应
@@ -62,15 +65,18 @@ func DelCron(ctx context.Context, req *common.DelFixedTimeSingleTaskReq) (resp *
 			resp.Msg = core.Success.Msg
 		}
 	}()
+	ctx = logx.ContextWithFields(ctx, logx.Field("id", req.Id))
+
 	// 1、格式校验
 	if req.Id == "" {
 		err = fmt.Errorf("task id is empty")
+		logx.WithContext(ctx).Error(err)
 		return
 	}
 	// 2、删除任务
 	err = cron.DelDataFromCronTasks(ctx, req)
 	if err != nil {
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		return
 	}
 	return
@@ -88,10 +94,12 @@ func QueryCron(ctx context.Context, req *common.QueryFixedTimeSingleTaskReq) (re
 			resp.Msg = core.Success.Msg
 		}
 	}()
+	ctx = logx.ContextWithFields(ctx, logx.Field("id", req.Id))
+
 	// 1、查询数据库
 	results, err := cron.QueryDataFromCronTasks(ctx, req)
 	if err != nil {
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		return
 	}
 	// 2、组装

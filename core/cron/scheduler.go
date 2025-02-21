@@ -1,6 +1,7 @@
 package cron
 
 import (
+	"context"
 	"dmc-task/core"
 	"dmc-task/core/common"
 	"dmc-task/core/timewheel"
@@ -53,7 +54,7 @@ func execFunc(taskParam common.CronCycleTask) func() {
 
 func entriesPrint(taskParam common.CronCycleTask) {
 	for _, entry := range c.Entries() {
-		logx.Debugf(">>>> ID:%d, Delay:%+v, job:%+v, wrappedJob:%+v, taskParam:%+v", entry.ID, entry.Schedule, entry.Job,
+		logx.Debugf(">>>> ID:%d, Delay:%+v, job:%+v, wrappedJob:%+v, BizCode:%+v", entry.ID, entry.Schedule, entry.Job,
 			entry.WrappedJob, taskParam.BizCode)
 	}
 }
@@ -64,17 +65,17 @@ func addDynamicTask(taskParam common.CronCycleTask) (int64, error) {
 	return int64(entryId), err
 }
 
-func removeDynamicTask(entryId cron.EntryID) {
+func removeDynamicTask(ctx context.Context, entryId cron.EntryID) {
 	c.Remove(entryId)
-	logx.Infof("[removeDynamicTask] entryId: %d", entryId)
+	logx.WithContext(ctx).Infof("[removeDynamicTask] entryId: %d", entryId)
 }
 
 func AddTask(taskParam common.CronCycleTask) (int64, error) {
 	return addDynamicTask(taskParam)
 }
 
-func RemoveTask(entryId int64) {
-	removeDynamicTask(cron.EntryID(entryId))
+func RemoveTask(ctx context.Context, entryId int64) {
+	removeDynamicTask(ctx, cron.EntryID(entryId))
 }
 
 func AddLockTask() error {
@@ -96,9 +97,6 @@ func AddLockTask() error {
 				_ = addCronCycleInitTasks()
 				// 添加数据库循环扫描任务（定时循环任务和固定循环任务）
 				_ = addCronScanFromDBTask()
-				// 添加固定时间任务scheduler
-				//logx.Debug("添加固定时间任务cron ....")
-				//_ = addCronCycleTaskOfFixTimeTasks()
 			}
 			return
 		}

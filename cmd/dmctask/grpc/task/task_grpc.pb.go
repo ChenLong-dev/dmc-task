@@ -22,6 +22,7 @@ const (
 	Task_AddCronCycleTask_FullMethodName         = "/Task/AddCronCycleTask"
 	Task_DelCronCycleTask_FullMethodName         = "/Task/DelCronCycleTask"
 	Task_ModCronCycleTask_FullMethodName         = "/Task/ModCronCycleTask"
+	Task_StartOrStopCronCycleTask_FullMethodName = "/Task/StartOrStopCronCycleTask"
 	Task_QueryCronCycleTask_FullMethodName       = "/Task/QueryCronCycleTask"
 	Task_AddFixedTimeSingleTask_FullMethodName   = "/Task/AddFixedTimeSingleTask"
 	Task_DelFixedTimeSingleTask_FullMethodName   = "/Task/DelFixedTimeSingleTask"
@@ -38,6 +39,7 @@ type TaskClient interface {
 	AddCronCycleTask(ctx context.Context, in *AddCronCycleTaskReq, opts ...grpc.CallOption) (*Response, error)
 	DelCronCycleTask(ctx context.Context, in *DelCronCycleTaskReq, opts ...grpc.CallOption) (*Response, error)
 	ModCronCycleTask(ctx context.Context, in *ModCronCycleTaskReq, opts ...grpc.CallOption) (*Response, error)
+	StartOrStopCronCycleTask(ctx context.Context, in *StartOrStopCronCycleTaskReq, opts ...grpc.CallOption) (*Response, error)
 	QueryCronCycleTask(ctx context.Context, in *QueryCronCycleTaskReq, opts ...grpc.CallOption) (*QueryCronCycleTaskResp, error)
 	// 固定时间单任务
 	AddFixedTimeSingleTask(ctx context.Context, in *AddFixedTimeSingleTaskReq, opts ...grpc.CallOption) (*Response, error)
@@ -80,6 +82,16 @@ func (c *taskClient) ModCronCycleTask(ctx context.Context, in *ModCronCycleTaskR
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Response)
 	err := c.cc.Invoke(ctx, Task_ModCronCycleTask_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskClient) StartOrStopCronCycleTask(ctx context.Context, in *StartOrStopCronCycleTaskReq, opts ...grpc.CallOption) (*Response, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Response)
+	err := c.cc.Invoke(ctx, Task_StartOrStopCronCycleTask_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -154,6 +166,7 @@ type TaskServer interface {
 	AddCronCycleTask(context.Context, *AddCronCycleTaskReq) (*Response, error)
 	DelCronCycleTask(context.Context, *DelCronCycleTaskReq) (*Response, error)
 	ModCronCycleTask(context.Context, *ModCronCycleTaskReq) (*Response, error)
+	StartOrStopCronCycleTask(context.Context, *StartOrStopCronCycleTaskReq) (*Response, error)
 	QueryCronCycleTask(context.Context, *QueryCronCycleTaskReq) (*QueryCronCycleTaskResp, error)
 	// 固定时间单任务
 	AddFixedTimeSingleTask(context.Context, *AddFixedTimeSingleTaskReq) (*Response, error)
@@ -180,6 +193,9 @@ func (UnimplementedTaskServer) DelCronCycleTask(context.Context, *DelCronCycleTa
 }
 func (UnimplementedTaskServer) ModCronCycleTask(context.Context, *ModCronCycleTaskReq) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ModCronCycleTask not implemented")
+}
+func (UnimplementedTaskServer) StartOrStopCronCycleTask(context.Context, *StartOrStopCronCycleTaskReq) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StartOrStopCronCycleTask not implemented")
 }
 func (UnimplementedTaskServer) QueryCronCycleTask(context.Context, *QueryCronCycleTaskReq) (*QueryCronCycleTaskResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method QueryCronCycleTask not implemented")
@@ -270,6 +286,24 @@ func _Task_ModCronCycleTask_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TaskServer).ModCronCycleTask(ctx, req.(*ModCronCycleTaskReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Task_StartOrStopCronCycleTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StartOrStopCronCycleTaskReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServer).StartOrStopCronCycleTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Task_StartOrStopCronCycleTask_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServer).StartOrStopCronCycleTask(ctx, req.(*StartOrStopCronCycleTaskReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -400,6 +434,10 @@ var Task_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ModCronCycleTask",
 			Handler:    _Task_ModCronCycleTask_Handler,
+		},
+		{
+			MethodName: "StartOrStopCronCycleTask",
+			Handler:    _Task_StartOrStopCronCycleTask_Handler,
 		},
 		{
 			MethodName: "QueryCronCycleTask",

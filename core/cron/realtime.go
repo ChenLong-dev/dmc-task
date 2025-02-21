@@ -50,7 +50,7 @@ func addRealTimeTask(ctx context.Context, taskParam common.RealTimeSingleTask) (
 	mj := jobsflow.NewTJobsFlowModel(*server.SvrCtx.MysqlConn)
 	_, err := mj.Insert(ctx, &job)
 	if err != nil {
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		return "", nil
 	}
 
@@ -58,7 +58,8 @@ func addRealTimeTask(ctx context.Context, taskParam common.RealTimeSingleTask) (
 }
 
 func execRealtime(job jobsflow.TJobsFlow) error {
-	ctx := context.Background()
+	ctx := logx.ContextWithFields(context.Background(), logx.Field("id", job.Id),
+		logx.Field("biz_code", job.BizCode), logx.Field("biz_id", job.BizId))
 
 	// 1、执行命令
 	var data []string
@@ -66,7 +67,7 @@ func execRealtime(job jobsflow.TJobsFlow) error {
 	var msg string
 	data, err := command.ExecCommand(ctx, job.Timeout, job.ExecPath, strings.Split(job.Param, " "))
 	if err != nil {
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		status = int64(core.Failed)
 		msg = err.Error()
 	} else {
@@ -82,7 +83,7 @@ func execRealtime(job jobsflow.TJobsFlow) error {
 	mj := jobsflow.NewTJobsFlowModel(*server.SvrCtx.MysqlConn)
 	err = mj.Update(ctx, &job)
 	if err != nil {
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		return nil
 	}
 	return nil
@@ -98,15 +99,17 @@ func QueryDataFromJobsFlow(ctx context.Context, req *common.QueryRealTimeSingleT
 		var result = &jobsflow.TJobsFlow{}
 		result, err = m.FindOne(ctx, req.Id)
 		if err != nil {
-			logx.Error(err)
+			logx.WithContext(ctx).Error(err)
 			return
 		}
 		results = append(results, result)
 		return
 	}
+	ctx = logx.ContextWithFields(ctx, logx.Field("id", req.Id))
+
 	if req.Status < 0 || req.Status > int64(core.Finished) {
 		err = errors.New("status is error")
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		return
 	}
 	if req.TimeHorizon == 0 {
@@ -115,10 +118,10 @@ func QueryDataFromJobsFlow(ctx context.Context, req *common.QueryRealTimeSingleT
 	if req.Limit == 0 {
 		req.Limit = core.DefaultLimit
 	}
-	logx.Debugf("req:%+v", req)
+
 	results, err = m.GetJobsFlowByStatus2(ctx, req.Status, req.TimeHorizon, req.Limit)
 	if err != nil {
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		return
 	}
 	return

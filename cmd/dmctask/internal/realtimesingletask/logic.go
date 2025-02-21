@@ -25,10 +25,12 @@ func AddJob(ctx context.Context, req *common.AddRealTimeSingleTaskReq) (resp *co
 			resp.Msg = fmt.Sprintf("%s, task id is %s", core.Success.Msg, taskId)
 		}
 	}()
+	ctx = logx.ContextWithFields(ctx, logx.Field("biz_code", req.BizCode), logx.Field("biz_id", req.BizId))
+
 	// 1、格式校验
 	if req.Type != int64(core.RealTimeSingleTask) {
 		err = errors.New("type is not real time task")
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		return
 	}
 	if req.Timeout <= 0 {
@@ -38,7 +40,7 @@ func AddJob(ctx context.Context, req *common.AddRealTimeSingleTaskReq) (resp *co
 	// 2、入库+执行+更新
 	taskId, err = cron.AddRealTimeTask(ctx, req.RealTimeSingleTask)
 	if err != nil {
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		return
 	}
 
@@ -58,11 +60,12 @@ func QueryJob(ctx context.Context, req *common.QueryRealTimeSingleTaskReq) (resp
 			resp.Msg = core.Success.Msg
 		}
 	}()
+	ctx = logx.ContextWithFields(ctx, logx.Field("id", req.Id))
 
 	// 1、查询数据库
 	results, err := cron.QueryDataFromJobsFlow(ctx, req)
 	if err != nil {
-		logx.Error(err)
+		logx.WithContext(ctx).Error(err)
 		return
 	}
 	// 2、组装

@@ -11,12 +11,12 @@ app:
 apiserver:
   enabled: true
   host: 0.0.0.0
-  port: 8888
+  port: 7888
 
 grpcserver:
   enabled: true
   host: 0.0.0.0
-  port: 8889
+  port: 7889
 
 logx:
   # 输出日志的模式，默认是 console, [console/file/volume]
@@ -38,9 +38,9 @@ logx:
 
 mysql:
   # mysql连接地址
-  host: 127.0.0.1
+  host: 10.30.4.229
   # mysql连接端口
-  port: 23306
+  port: 3306
   # mysql连接用户名
   username: root
   # mysql连接密码
