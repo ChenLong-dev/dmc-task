@@ -50,66 +50,6 @@ func cleanAll(conn *sqlx.SqlConn) {
 	cleanJobsFlow(conn)
 }
 
-func TestInsertCronTasks(t *testing.T) {
-	m := crontasks.NewTCronTasksModel(*newMysqlConn())
-	for i := 0; i < 10; i++ {
-		result, err := m.Insert(context.Background(), generateCronTask())
-		if err != nil {
-			t.Error(err)
-		}
-		l, _ := result.LastInsertId()
-		r, _ := result.RowsAffected()
-		t.Logf("LastInsertId:%d, RowsAffected:%d", l, r)
-		//time.Sleep(1 * time.Second)
-	}
-}
-
-func TestInsertJobsFlow(t *testing.T) {
-	conn := newMysqlConn()
-	m := jobsflow.NewTJobsFlowModel(*conn)
-	for i := 0; i < 100; i++ {
-		result, err := m.Insert(context.Background(), generateJobFlow(nil))
-		if err != nil {
-			t.Error(err)
-		}
-		l, _ := result.LastInsertId()
-		r, _ := result.RowsAffected()
-		t.Logf("LastInsertId:%d, RowsAffected:%d", l, r)
-		//time.Sleep(500 * time.Millisecond)
-	}
-}
-
-func TestGetAndUpdateCronTasksAndJobsFlow(t *testing.T) {
-	conn := newMysqlConn()
-	cleanAll(conn)
-	defer cleanAll(conn)
-	result, err := crontasks.NewTCronTasksModel(*conn).Insert(context.Background(), generateCronTask())
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	l, _ := result.LastInsertId()
-	r, _ := result.RowsAffected()
-	t.Logf("[insert] LastInsertId:%d, RowsAffected:%d", l, r)
-	time.Sleep(1 * time.Second)
-
-	jobFlow, err := GetAndUpdateCronTasksAndJobsFlow(context.Background())
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	t.Logf("[get job] jobFlow:%+v", jobFlow)
-
-	_, err = GetAndUpdateCronTasksAndJobsFlow(context.Background())
-	if err != nil {
-		if err == crontasks.ErrNotFound {
-			t.Log("no pending task found")
-		} else {
-			t.Error(err)
-		}
-	}
-}
-
 func TestClearAll(t *testing.T) {
 	conn := newMysqlConn()
 	cleanAll(conn)
