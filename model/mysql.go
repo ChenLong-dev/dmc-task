@@ -2,6 +2,8 @@ package model
 
 import (
 	"context"
+	"dmc-task/core"
+	"dmc-task/core/common"
 	"dmc-task/model/lock"
 	"dmc-task/server"
 	"dmc-task/utils"
@@ -80,4 +82,145 @@ func Renew() error {
 
 func Reset() error {
 	return lock.NewTDistributedLocksModel(*server.SvrCtx.MysqlConn).Reset(server.SvrCtx.IsMasterSource)
+}
+
+// ***************************************************  分页获取
+
+type PaginationRequest struct {
+	Ctx      context.Context
+	Conn     sqlx.SqlConn
+	Table    string
+	Where    string
+	OrderBy  string
+	Args     []interface{}
+	Page     int
+	PageSize int
+}
+
+type PaginationResult[T any] struct {
+	Count int  `json:"count"`
+	Data  []*T `json:"data"`
+}
+
+func Paginate[T any](req *PaginationRequest) (result *PaginationResult[T], err error) {
+	if req == nil {
+		err = fmt.Errorf("req is nil")
+		logx.WithContext(req.Ctx).Error(err)
+		return
+	}
+
+	offset := (req.Page - 1) * req.PageSize
+	if offset < 0 {
+		offset = 0
+	}
+
+	// 查询总数
+	countQuery := fmt.Sprintf("SELECT COUNT(*) FROM %s", req.Table)
+	if req.Where != "" {
+		countQuery = fmt.Sprintf("%s WHERE %s", countQuery, req.Where)
+	}
+
+	var count int
+	if err = req.Conn.QueryRowCtx(req.Ctx, &count, countQuery, req.Args...); err != nil {
+		logx.WithContext(req.Ctx).Error(err)
+		return
+	}
+
+	// 查询数据
+	dataQuery := fmt.Sprintf("SELECT * FROM %s", req.Table)
+	if req.Where != "" {
+		dataQuery = fmt.Sprintf("%s WHERE %s", dataQuery, req.Where)
+	}
+	if req.OrderBy != "" {
+		dataQuery = fmt.Sprintf("%s ORDER BY %s", dataQuery, req.OrderBy)
+	}
+	if req.Page > 0 && req.PageSize > 0 {
+		dataQuery = fmt.Sprintf("%s LIMIT %d OFFSET %d", dataQuery, req.PageSize, offset)
+	}
+	logx.WithContext(req.Ctx).Debug(dataQuery)
+
+	var data []*T
+	if err = req.Conn.QueryRowsCtx(req.Ctx, &data, dataQuery, req.Args...); err != nil {
+		logx.WithContext(req.Ctx).Error(err)
+		return
+	}
+	return &PaginationResult[T]{
+		Count: count,
+		Data:  data,
+	}, nil
+}
+
+func Query[T any](ctx context.Context, table string, filter common.FilterBase, page common.PageBase) (result *PaginationResult[T], err error) {
+	// 1、查询条件
+	query := PaginationRequest{}
+	query.Ctx = ctx
+	query.Conn = *server.SvrCtx.MysqlConn
+	query.Table = table
+
+	if filter.TimeType != "" {
+		query.OrderBy = fmt.Sprintf("%s DESC", filter.TimeType)
+	}
+
+	query.Page = int(page.Page)
+	query.PageSize = int(page.PageSize)
+	if query.Page <= 0 {
+		query.Page = 1
+	}
+	if query.PageSize <= 0 {
+		query.PageSize = 10
+	}
+
+	where := ""
+	if filter.Id != "" {
+		where = fmt.Sprintf("id = '%s'", filter.Id)
+	}
+
+	if filter.BizCode != "" {
+		if where != "" {
+			where = fmt.Sprintf("%s AND biz_code = '%s'", where, filter.BizCode)
+		} else {
+			where = fmt.Sprintf("biz_code = '%s'", filter.BizCode)
+		}
+	}
+
+	if filter.BizId != "" {
+		if where != "" {
+			where = fmt.Sprintf("%s AND biz_id = '%s'", where, filter.BizId)
+		} else {
+			where = fmt.Sprintf("biz_id = '%s'", filter.BizId)
+		}
+	}
+
+	if filter.CronTaskId != "" {
+		if where != "" {
+			where = fmt.Sprintf("%s AND cron_task_id = '%s'", where, filter.CronTaskId)
+		} else {
+			where = fmt.Sprintf("cron_task_id = '%s'", filter.CronTaskId)
+		}
+	}
+
+	if filter.Status > int64(core.Stoped) && filter.Status < int64(core.Finished) {
+		if where != "" {
+			where = fmt.Sprintf("%s AND status = %d", where, filter.Status)
+		} else {
+			where = fmt.Sprintf("status = %d", filter.Status)
+		}
+	}
+
+	if filter.TimeType != "" && filter.Start != "" && filter.End != "" {
+		if where != "" {
+			where = fmt.Sprintf("%s AND %s BETWEEN '%s' AND '%s'", where, filter.TimeType, filter.Start, filter.End)
+		} else {
+			where = fmt.Sprintf("%s BETWEEN '%s' AND '%s'", filter.TimeType, filter.Start, filter.End)
+		}
+	}
+	query.Where = where
+
+	// 2、查询分页
+	res, err := Paginate[T](&query)
+	if err != nil {
+		logx.WithContext(ctx).Error(err)
+		return
+	}
+	return res, nil
 }

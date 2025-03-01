@@ -94,10 +94,10 @@ func QueryCron(ctx context.Context, req *common.QueryFixedTimeSingleTaskReq) (re
 			resp.Msg = core.Success.Msg
 		}
 	}()
-	ctx = logx.ContextWithFields(ctx, logx.Field("id", req.Id))
+	ctx = logx.ContextWithFields(ctx, logx.Field("filter", req.Filter))
 
 	// 1、查询数据库
-	results, err := cron.QueryDataFromCronTasks(ctx, req)
+	total, results, err := cron.QueryDataFromCronTasks(ctx, req)
 	if err != nil {
 		logx.WithContext(ctx).Error(err)
 		return
@@ -108,6 +108,8 @@ func QueryCron(ctx context.Context, req *common.QueryFixedTimeSingleTaskReq) (re
 			BaseData: common.BaseData{
 				Id:     v.Id,
 				Status: v.Status,
+				UpdateTime: utils.GetTimeStr(v.UpdateTime),
+				CreateTime: utils.GetTimeStr(v.CreateTime),
 			},
 			FixedTimeSingleTask: common.FixedTimeSingleTask{
 				Type:     v.Type,
@@ -125,5 +127,7 @@ func QueryCron(ctx context.Context, req *common.QueryFixedTimeSingleTaskReq) (re
 			ResultMsg:  v.ResultMsg,
 		})
 	}
+	resp.Page = req.Page
+	resp.Page.Total = total
 	return
 }

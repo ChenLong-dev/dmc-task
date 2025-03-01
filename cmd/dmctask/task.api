@@ -7,12 +7,31 @@ type Base {
 }
 
 type BaseData {
-	Id     string `json:"id"`
-	Status int64  `json:"status"`
+	Id         string `json:"id"`
+	Status     int64  `json:"status"`
+	UpdateTime string `json:"update_time"`
+	CreateTime string `json:"create_time"`
 }
 
 type Response {
 	Base
+}
+
+type FilterBase {
+	Id         string `json:"id,optional"`
+	BizCode    string `json:"biz_code,optional"`
+	BizId      string `json:"biz_id,optional"`
+	CronTaskId string `json:"cron_task_id,optional"`
+	Status     int64  `json:"status,default=4" validate:"oneof=-4 -3 -2 -1 0 1 2 3 4"`
+	TimeType   string `json:"time_type,default=create_time" validate:"oneof=create_time update_time start_time finish_time"`
+	Start      string `json:"start,optional" validate:"omitempty,checkDate"`
+	End        string `json:"end,optional" validate:"omitempty,checkDate"`
+}
+
+type PageBase {
+	Total    int64 `json:"total,optional"`
+	Page     int64 `json:"page,optional"`
+	PageSize int64 `json:"page_size,optional"`
 }
 
 // ================================================
@@ -51,7 +70,8 @@ type StartOrStopCronCycleTaskReq {
 
 // 查询：查询定时循环任务请求
 type QueryCronCycleTaskReq {
-	Id string `json:"id,optional"`
+	Filter FilterBase `json:"filter" validate:"required"`
+	Page   PageBase   `json:"page" validate:"required"`
 }
 
 // 查询：查询定时循环任务应答
@@ -60,9 +80,10 @@ type CronCycleTaskData {
 	CronCycleTask
 }
 
-type QueryTaskConfigResp {
+type QueryCronCycleTaskResp {
 	Base
 	Data []CronCycleTaskData `json:"data"`
+	Page PageBase            `json:"page"`
 }
 
 // ================================================
@@ -90,10 +111,8 @@ type DelFixedTimeSingleTaskReq {
 
 // 查询：查询定时任务请求
 type QueryFixedTimeSingleTaskReq {
-	Id          string `json:"id,optional"`
-	Status      int64  `json:"status,optional"`
-	TimeHorizon int64  `json:"time_horizon,optional"`
-	Limit       int64  `json:"limit,optional"`
+	Filter FilterBase `json:"filter" validate:"required"`
+	Page   PageBase   `json:"page" validate:"required"`
 }
 
 // 查询：查询定时任务应答
@@ -109,6 +128,7 @@ type FixedTimeSingleTaskData {
 type QueryFixedTimeSingleTaskResp {
 	Base
 	Data []FixedTimeSingleTaskData `json:"data"`
+	Page PageBase                  `json:"page"`
 }
 
 // ================================================
@@ -130,10 +150,8 @@ type AddRealTimeSingleTaskReq {
 
 // 查询：查询实时单任务请求
 type QueryRealTimeSingleTaskReq {
-	Id          string `json:"id,optional"`
-	Status      int64  `json:"status,optional"`
-	TimeHorizon int64  `json:"time_horizon,optional"`
-	Limit       int64  `json:"limit,optional"`
+	Filter FilterBase `json:"filter" validate:"required"`
+	Page   PageBase   `json:"page" validate:"required"`
 }
 
 // 查询：查询实时单任务应答
@@ -149,6 +167,7 @@ type RealTimeSingleTaskData {
 type QueryRealTimeSingleTaskResp {
 	Base
 	Data []RealTimeSingleTaskData `json:"data"`
+	Page PageBase                 `json:"page"`
 }
 
 // ================================================
@@ -196,7 +215,7 @@ service task-api {
 	post /cycle/startorstop (StartOrStopCronCycleTaskReq) returns (Response)
 
 	@handler queryCronCycle
-	post /cycle/query (QueryCronCycleTaskReq) returns (QueryTaskConfigResp)
+	post /cycle/query (QueryCronCycleTaskReq) returns (QueryCronCycleTaskResp)
 }
 
 @server (

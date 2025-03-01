@@ -3,7 +3,8 @@ package core
 var (
 	Success = NewError(0, "success")
 	// 10000-10100 系统错误
-	DBError = NewError(10000, "db is error")
+	DBError    = NewError(10000, "db is error")
+	InnerError = NewError(10001, "inner error")
 	// 10100-10200 定时循环任务相关错误
 	CronCycleError = NewError(10100, "cron cycle is error")
 

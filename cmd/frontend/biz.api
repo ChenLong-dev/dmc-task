@@ -1,0 +1,23 @@
+syntax = "v1"
+
+type Request {
+	BizType int    `json:"biz_type" validate:"required"`
+	TaskId  string `json:"task_id,optional"`
+	Start   int64  `json:"start,optional"`
+	End     int64  `json:"end,optional"`
+}
+
+type Response {
+	Code int         `json:"code"`
+	Msg  string      `json:"msg"`
+	Data interface{} `json:"data"`
+}
+
+@server (
+	prefix: v1
+)
+service biz-api {
+	@handler BizHandler
+	post /tasks/list (Request) returns (Response)
+}
+

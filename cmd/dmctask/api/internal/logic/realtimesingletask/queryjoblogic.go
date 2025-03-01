@@ -28,10 +28,16 @@ func NewQueryJobLogic(ctx context.Context, svcCtx *svc.ServiceContext) *QueryJob
 func (l *QueryJobLogic) QueryJob(req *types.QueryRealTimeSingleTaskReq) (resp *types.QueryRealTimeSingleTaskResp, err error) {
 	// todo: add your logic here and delete this line
 	r := &common.QueryRealTimeSingleTaskReq{}
-	r.Id = req.Id
-	r.Status = req.Status
-	r.TimeHorizon = req.TimeHorizon
-	r.Limit = req.Limit
+	r.Filter.Id = req.Filter.Id
+	r.Filter.BizCode = req.Filter.BizCode
+	r.Filter.BizId = req.Filter.BizId
+	r.Filter.CronTaskId = req.Filter.CronTaskId
+	r.Filter.Status = req.Filter.Status
+	r.Filter.TimeType = req.Filter.TimeType
+	r.Filter.Start = req.Filter.Start
+	r.Filter.End = req.Filter.End
+	r.Page.Page = req.Page.Page
+	r.Page.PageSize = req.Page.PageSize
 	res := realtimesingletask.QueryJob(l.ctx, r)
 	resp = &types.QueryRealTimeSingleTaskResp{}
 	resp.Code = res.Code
@@ -41,6 +47,8 @@ func (l *QueryJobLogic) QueryJob(req *types.QueryRealTimeSingleTaskReq) (resp *t
 			BaseData: types.BaseData{
 				Id:     v.Id,
 				Status: v.Status,
+				UpdateTime: v.UpdateTime,
+				CreateTime: v.CreateTime,
 			},
 			RealTimeSingleTask: types.RealTimeSingleTask{
 				Type:     v.Type,
@@ -56,5 +64,8 @@ func (l *QueryJobLogic) QueryJob(req *types.QueryRealTimeSingleTaskReq) (resp *t
 			ResultMsg:  v.ResultMsg,
 		})
 	}
+	resp.Page.Total = res.Page.Total
+	resp.Page.Page = res.Page.Page
+	resp.Page.PageSize = res.Page.PageSize
 	return
 }

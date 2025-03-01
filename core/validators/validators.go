@@ -25,6 +25,13 @@ func ValidateEmail(fl validator.FieldLevel) bool {
 	return true
 }
 
+// ValidateDate 验证日期格式是否正确
 func ValidateDate(fl validator.FieldLevel) bool {
+	if deadlineStr, ok := fl.Field().Interface().(string); ok { // 解析截止日期字符串为time.Time类型
+		_, err := time.Parse("2006-01-02 15:04:05", deadlineStr)
+		if err != nil {
+			return false
+		}
+	}
 	return true
 }

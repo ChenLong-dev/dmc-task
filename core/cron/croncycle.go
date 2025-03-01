@@ -6,6 +6,7 @@ import (
 	"dmc-task/core"
 	"dmc-task/core/command"
 	"dmc-task/core/common"
+	"dmc-task/model"
 	"dmc-task/model/croncycletasks"
 	"dmc-task/model/crontasks"
 	"dmc-task/model/jobsflow"
@@ -362,29 +363,15 @@ func StartOrStopDataFromCronCycleTask(ctx context.Context, req *common.StartOrSt
 }
 
 // QueryDataFromCronCycleTask 从定时任务中查询数据
-func QueryDataFromCronCycleTask(ctx context.Context, req *common.QueryCronCycleTaskReq) (results []*croncycletasks.TCronCycleTasks, err error) {
-	logx.WithContext(ctx).Debug("[QueryDataFromCronCycleTask]")
-	m := croncycletasks.NewTCronCycleTasksModel(*server.SvrCtx.MysqlConn)
-	if req.Id == "" {
-		results, err = m.GetCronTasks(ctx)
-		if err != nil {
-			if errors.Is(err, croncycletasks.ErrNotFound) {
-				return nil, errors.New("tasks not found")
-			}
-			logx.WithContext(ctx).Error(err)
-			return
-		}
-	} else {
-		var result *croncycletasks.TCronCycleTasks
-		result, err = m.GetCronTaskById(ctx, req.Id)
-		if err != nil {
-			if errors.Is(err, croncycletasks.ErrNotFound) {
-				return nil, errors.New("task not found")
-			}
-			logx.WithContext(ctx).Error(err)
-			return
-		}
-		results = append(results, result)
+func QueryDataFromCronCycleTask(ctx context.Context, req *common.QueryCronCycleTaskReq) (total int64, results []*croncycletasks.TCronCycleTasks, err error) {
+	res, err := model.Query[croncycletasks.TCronCycleTasks](
+		ctx,
+		croncycletasks.NewTCronCycleTasksModel(*server.SvrCtx.MysqlConn).GetTableName(),
+		req.Filter,
+		req.Page)
+	if err != nil {
+		logx.WithContext(ctx).Error(err)
+		return
 	}
-	return
+	return int64(res.Count), res.Data, nil
 }

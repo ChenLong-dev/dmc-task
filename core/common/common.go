@@ -21,8 +21,10 @@ type Base struct {
 }
 
 type BaseData struct {
-	Id     string `json:"id"`
-	Status int64  `json:"status"`
+	Id         string `json:"id"`
+	Status     int64  `json:"status"`
+	UpdateTime string `json:"update_time"`
+	CreateTime string `json:"create_time"`
 }
 
 type CronCycleTask struct {
@@ -46,6 +48,17 @@ type DelCronCycleTaskReq struct {
 
 type DelFixedTimeSingleTaskReq struct {
 	Id string `json:"id" validate:"required"`
+}
+
+type FilterBase struct {
+	Id         string `json:"id,optional"`
+	BizCode    string `json:"biz_code,optional"`
+	BizId      string `json:"biz_id,optional"`
+	CronTaskId string `json:"cron_task_id,optional"`
+	Status     int64  `json:"status,default=4" validate:"oneof=-4 -3 -2 -1 0 1 2 3 4"`
+	TimeType   string `json:"time_type,default=create_time" validate:"oneof=create_time update_time start_time finish_time"`
+	Start      string `json:"start,optional" validate:"omitempty,checkDate"`
+	End        string `json:"end,optional" validate:"omitempty,checkDate"`
 }
 
 type FixedTimeSingleTask struct {
@@ -73,6 +86,12 @@ type ModCronCycleTaskReq struct {
 	CronCycleTask
 }
 
+type PageBase struct {
+	Total    int64 `json:"total,optional"`
+	Page     int64 `json:"page,optional"`
+	PageSize int64 `json:"page_size,optional"`
+}
+
 type PostDemo struct {
 	Name           string `json:"name" validate:"required"`                           // 姓名
 	Age            int64  `json:"age" validate:"required,gte=1,lte=130"`              // 年龄
@@ -88,36 +107,36 @@ type PostDemoReq struct {
 }
 
 type QueryCronCycleTaskReq struct {
-	Id string `json:"id,optional"`
+	Filter FilterBase `json:"filter" validate:"required"`
+	Page   PageBase   `json:"page" validate:"required"`
+}
+
+type QueryCronCycleTaskResp struct {
+	Base
+	Data []CronCycleTaskData `json:"data"`
+	Page PageBase            `json:"page"`
 }
 
 type QueryFixedTimeSingleTaskReq struct {
-	Id          string `json:"id,optional"`
-	Status      int64  `json:"status,optional"`
-	TimeHorizon int64  `json:"time_horizon,optional"`
-	Limit       int64  `json:"limit,optional"`
+	Filter FilterBase `json:"filter" validate:"required"`
+	Page   PageBase   `json:"page" validate:"required"`
 }
 
 type QueryFixedTimeSingleTaskResp struct {
 	Base
 	Data []FixedTimeSingleTaskData `json:"data"`
+	Page PageBase                  `json:"page"`
 }
 
 type QueryRealTimeSingleTaskReq struct {
-	Id          string `json:"id,optional"`
-	Status      int64  `json:"status,optional"`
-	TimeHorizon int64  `json:"time_horizon,optional"`
-	Limit       int64  `json:"limit,optional"`
+	Filter FilterBase `json:"filter" validate:"required"`
+	Page   PageBase   `json:"page" validate:"required"`
 }
 
 type QueryRealTimeSingleTaskResp struct {
 	Base
 	Data []RealTimeSingleTaskData `json:"data"`
-}
-
-type QueryTaskConfigResp struct {
-	Base
-	Data []CronCycleTaskData `json:"data"`
+	Page PageBase                 `json:"page"`
 }
 
 type RealTimeSingleTask struct {

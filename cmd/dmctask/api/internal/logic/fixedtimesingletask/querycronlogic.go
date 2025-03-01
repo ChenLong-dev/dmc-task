@@ -28,10 +28,16 @@ func NewQueryCronLogic(ctx context.Context, svcCtx *svc.ServiceContext) *QueryCr
 func (l *QueryCronLogic) QueryCron(req *types.QueryFixedTimeSingleTaskReq) (resp *types.QueryFixedTimeSingleTaskResp, err error) {
 	// todo: add your logic here and delete this line
 	r := &common.QueryFixedTimeSingleTaskReq{}
-	r.Id = req.Id
-	r.Status = req.Status
-	r.TimeHorizon = req.TimeHorizon
-	r.Limit = req.Limit
+	r.Filter.Id = req.Filter.Id
+	r.Filter.BizCode = req.Filter.BizCode
+	r.Filter.BizId = req.Filter.BizId
+	//r.Filter.CronTaskId = req.Filter.CronTaskId // 该类型任务没有定时任务ID
+	r.Filter.Status = req.Filter.Status
+	r.Filter.TimeType = req.Filter.TimeType
+	r.Filter.Start = req.Filter.Start
+	r.Filter.End = req.Filter.End
+	r.Page.Page = req.Page.Page
+	r.Page.PageSize = req.Page.PageSize
 	res := fixedtimesingletask.QueryCron(l.ctx, r)
 	resp = &types.QueryFixedTimeSingleTaskResp{}
 	resp.Code = res.Code
@@ -39,8 +45,10 @@ func (l *QueryCronLogic) QueryCron(req *types.QueryFixedTimeSingleTaskReq) (resp
 	for _, v := range res.Data {
 		resp.Data = append(resp.Data, types.FixedTimeSingleTaskData{
 			BaseData: types.BaseData{
-				Id:     v.Id,
-				Status: v.Status,
+				Id:         v.Id,
+				Status:     v.Status,
+				UpdateTime: v.UpdateTime,
+				CreateTime: v.CreateTime,
 			},
 			FixedTimeSingleTask: types.FixedTimeSingleTask{
 				Type:     v.Type,
@@ -57,5 +65,8 @@ func (l *QueryCronLogic) QueryCron(req *types.QueryFixedTimeSingleTaskReq) (resp
 			ResultMsg:  v.ResultMsg,
 		})
 	}
+	resp.Page.Total = res.Page.Total
+	resp.Page.Page = res.Page.Page
+	resp.Page.PageSize = res.Page.PageSize
 	return
 }

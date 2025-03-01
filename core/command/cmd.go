@@ -2,8 +2,9 @@ package command
 
 import (
 	"context"
-	"github.com/zeromicro/go-zero/core/logx"
 	"runtime"
+
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 const (
@@ -18,6 +19,8 @@ func ExecCommand(ctx context.Context, timeout int64, commandName string, params 
 	case "windows":
 		data, err = execCommand(ctx, timeout, commandName, params)
 	case "linux":
+		data, err = execCommand(ctx, timeout, commandName, params)
+	case "darwin":
 		data, err = execCommand(ctx, timeout, commandName, params)
 	default:
 		logx.WithContext(ctx).Error("not support os")

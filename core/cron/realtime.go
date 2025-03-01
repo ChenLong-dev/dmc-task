@@ -6,10 +6,10 @@ import (
 	"dmc-task/core"
 	"dmc-task/core/command"
 	"dmc-task/core/common"
+	"dmc-task/model"
 	"dmc-task/model/jobsflow"
 	"dmc-task/server"
 	"dmc-task/utils"
-	"errors"
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 	"strings"
@@ -93,36 +93,15 @@ func execRealtime(job jobsflow.TJobsFlow) error {
 // 实时单任务相关
 
 // QueryDataFromJobsFlow 从JobsFlow表中查询数据
-func QueryDataFromJobsFlow(ctx context.Context, req *common.QueryRealTimeSingleTaskReq) (results []*jobsflow.TJobsFlow, err error) {
-	m := jobsflow.NewTJobsFlowModel(*server.SvrCtx.MysqlConn)
-	if req.Id != "" {
-		var result = &jobsflow.TJobsFlow{}
-		result, err = m.FindOne(ctx, req.Id)
-		if err != nil {
-			logx.WithContext(ctx).Error(err)
-			return
-		}
-		results = append(results, result)
-		return
-	}
-	ctx = logx.ContextWithFields(ctx, logx.Field("id", req.Id))
-
-	if req.Status < 0 || req.Status > int64(core.Finished) {
-		err = errors.New("status is error")
-		logx.WithContext(ctx).Error(err)
-		return
-	}
-	if req.TimeHorizon == 0 {
-		req.TimeHorizon = core.DefaultTimeHorizon
-	}
-	if req.Limit == 0 {
-		req.Limit = core.DefaultLimit
-	}
-
-	results, err = m.GetJobsFlowByStatus2(ctx, req.Status, req.TimeHorizon, req.Limit)
+func QueryDataFromJobsFlow(ctx context.Context, req *common.QueryRealTimeSingleTaskReq) (total int64, results []*jobsflow.TJobsFlow, err error) {
+	res, err := model.Query[jobsflow.TJobsFlow](
+		ctx,
+		jobsflow.NewTJobsFlowModel(*server.SvrCtx.MysqlConn).GetTableName(),
+		req.Filter,
+		req.Page)
 	if err != nil {
 		logx.WithContext(ctx).Error(err)
 		return
 	}
-	return
+	return int64(res.Count), res.Data, nil
 }

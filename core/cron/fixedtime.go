@@ -7,6 +7,7 @@ import (
 	"dmc-task/core/command"
 	"dmc-task/core/common"
 	"dmc-task/core/timewheel"
+	"dmc-task/model"
 	"dmc-task/model/crontasks"
 	"dmc-task/model/jobsflow"
 	"dmc-task/server"
@@ -257,36 +258,15 @@ func DelDataFromCronTasks(ctx context.Context, req *common.DelFixedTimeSingleTas
 }
 
 // QueryDataFromCronTasks 从定时任务中查询数据
-func QueryDataFromCronTasks(ctx context.Context, req *common.QueryFixedTimeSingleTaskReq) (results []*crontasks.TCronTasks, err error) {
-	m := crontasks.NewTCronTasksModel(*server.SvrCtx.MysqlConn)
-	if req.Id != "" {
-		var result = &crontasks.TCronTasks{}
-		result, err = m.FindOne(ctx, req.Id)
-		if err != nil {
-			logx.WithContext(ctx).Error(err)
-			return
-		}
-		results = append(results, result)
-		return
-	}
-	ctx = logx.ContextWithFields(ctx, logx.Field("id", req.Id))
-
-	if req.Status < 0 || req.Status > int64(core.Finished) {
-		err = errors.New("status is error")
-		logx.WithContext(ctx).Error(err)
-		return
-	}
-	if req.TimeHorizon == 0 {
-		req.TimeHorizon = core.DefaultTimeHorizon
-	}
-	if req.Limit == 0 {
-		req.Limit = core.DefaultLimit
-	}
-	logx.Debugf("req:%+v", req)
-	results, err = m.GetCronTasksByStatus2(ctx, req.Status, req.TimeHorizon, req.Limit)
+func QueryDataFromCronTasks(ctx context.Context, req *common.QueryFixedTimeSingleTaskReq) (total int64, results []*crontasks.TCronTasks, err error) {
+	res, err := model.Query[crontasks.TCronTasks](
+		ctx,
+		crontasks.NewTCronTasksModel(*server.SvrCtx.MysqlConn).GetTableName(),
+		req.Filter,
+		req.Page)
 	if err != nil {
 		logx.WithContext(ctx).Error(err)
 		return
 	}
-	return
+	return int64(res.Count), res.Data, nil
 }

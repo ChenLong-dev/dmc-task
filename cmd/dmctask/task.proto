@@ -12,10 +12,29 @@ message Base {
 message BaseData {
   string id = 1;
   int64 status = 2;
+  string update_time = 3;
+  string create_time = 4;
 }
 
 message Response {
   Base base = 1;
+}
+
+message FilterBase {
+  string id = 1;
+  string biz_code = 2;
+  string biz_id = 3;
+  string cron_task_id = 4;
+  int64 status = 5;
+  string time_type = 6;
+  string start = 7;
+  string end = 8;
+}
+
+message PageBase {
+  int64 total = 1;
+  int64 page = 2;
+  int64 page_size = 3;
 }
 
 // ================================================
@@ -54,7 +73,8 @@ message StartOrStopCronCycleTaskReq {
 
 // 查询：查询定时循环任务请求
 message QueryCronCycleTaskReq {
-  string id = 1;
+  FilterBase filter = 1;
+  PageBase page = 2;
 }
 
 message CronCycleTaskData {
@@ -65,6 +85,7 @@ message CronCycleTaskData {
 message QueryCronCycleTaskResp {
   Base base = 1;
   repeated CronCycleTaskData data = 2;
+  PageBase page = 3;
 }
 
 // ================================================
@@ -92,10 +113,8 @@ message DelFixedTimeSingleTaskReq {
 
 // 查询：查询定时任务请求
 message QueryFixedTimeSingleTaskReq {
-  string id = 1;
-  int64 status = 2;
-  int64 time_horizon = 3;
-  int64 limit = 4;
+  FilterBase filter = 1;
+  PageBase page = 2;
 }
 
 // 查询：查询定时任务应答
@@ -111,6 +130,7 @@ message FixedTimeSingleTaskData {
 message QueryFixedTimeSingleTaskResp {
   Base base = 1;
   repeated FixedTimeSingleTaskData data = 2;
+  PageBase page = 3;
 }
 
 // ================================================
@@ -130,10 +150,8 @@ message AddRealTimeSingleTaskReq {
 }
 
 message QueryRealTimeSingleTaskReq {
-  string id = 1;
-  int64 status = 2;
-  int64 time_horizon = 3;
-  int64 limit = 4;
+  FilterBase filter = 1;
+  PageBase page = 2;
 }
 
 message RealTimeSingleTaskData {
@@ -148,6 +166,7 @@ message RealTimeSingleTaskData {
 message QueryRealTimeSingleTaskResp {
   Base base = 1;
   repeated RealTimeSingleTaskData data = 2;
+  PageBase page = 3;
 }
 
 // ================================================

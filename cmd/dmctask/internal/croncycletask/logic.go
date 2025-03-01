@@ -6,7 +6,7 @@ import (
 	"dmc-task/core/command"
 	"dmc-task/core/common"
 	"dmc-task/core/cron"
-	"dmc-task/model/croncycletasks"
+	"dmc-task/utils"
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -148,9 +148,9 @@ func StartOrStopCronCycle(ctx context.Context, req *common.StartOrStopCronCycleT
 	return
 }
 
-func QueryCronCycle(ctx context.Context, req *common.QueryCronCycleTaskReq) (resp *common.QueryTaskConfigResp) {
+func QueryCronCycle(ctx context.Context, req *common.QueryCronCycleTaskReq) (resp *common.QueryCronCycleTaskResp) {
 	var err error
-	resp = &common.QueryTaskConfigResp{}
+	resp = &common.QueryCronCycleTaskResp{}
 	defer func() {
 		if err != nil {
 			resp.Code = core.CronCycleError.Code
@@ -160,11 +160,17 @@ func QueryCronCycle(ctx context.Context, req *common.QueryCronCycleTaskReq) (res
 			resp.Msg = core.Success.Msg
 		}
 	}()
-	ctx = logx.ContextWithFields(ctx, logx.Field("id", req.Id))
+	ctx = logx.ContextWithFields(ctx, logx.Field("filter", req.Filter))
+
+	// 1、格式检查
+	if req.Filter.TimeType != "" && req.Filter.TimeType != "create_time" && req.Filter.TimeType != "update_time" {
+		err = errors.New("time_type is not create_time or update_time")
+		logx.WithContext(ctx).Error(err)
+		return
+	}
 
 	// 1、查询定时任务
-	var results []*croncycletasks.TCronCycleTasks
-	results, err = cron.QueryDataFromCronCycleTask(ctx, req)
+	total, results, err := cron.QueryDataFromCronCycleTask(ctx, req)
 	if err != nil {
 		logx.WithContext(ctx).Error(err)
 		return
@@ -173,8 +179,10 @@ func QueryCronCycle(ctx context.Context, req *common.QueryCronCycleTaskReq) (res
 	for _, v := range results {
 		resp.Data = append(resp.Data, common.CronCycleTaskData{
 			BaseData: common.BaseData{
-				Id:     v.Id,
-				Status: v.Status,
+				Id:         v.Id,
+				Status:     v.Status,
+				UpdateTime: utils.GetTimeStr(v.UpdateTime),
+				CreateTime: utils.GetTimeStr(v.CreateTime),
 			},
 			CronCycleTask: common.CronCycleTask{
 				Type:     v.Type,
@@ -187,5 +195,7 @@ func QueryCronCycle(ctx context.Context, req *common.QueryCronCycleTaskReq) (res
 			},
 		})
 	}
+	resp.Page = req.Page
+	resp.Page.Total = total
 	return
 }

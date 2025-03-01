@@ -49,6 +49,7 @@ func AddJob(ctx context.Context, req *common.AddRealTimeSingleTaskReq) (resp *co
 }
 
 func QueryJob(ctx context.Context, req *common.QueryRealTimeSingleTaskReq) (resp *common.QueryRealTimeSingleTaskResp) {
+	logx.WithContext(ctx).Infof("[QueryJob] req:%+v", req)
 	var err error
 	resp = &common.QueryRealTimeSingleTaskResp{}
 	defer func() {
@@ -60,10 +61,10 @@ func QueryJob(ctx context.Context, req *common.QueryRealTimeSingleTaskReq) (resp
 			resp.Msg = core.Success.Msg
 		}
 	}()
-	ctx = logx.ContextWithFields(ctx, logx.Field("id", req.Id))
+	ctx = logx.ContextWithFields(ctx, logx.Field("filter", req.Filter))
 
 	// 1、查询数据库
-	results, err := cron.QueryDataFromJobsFlow(ctx, req)
+	total, results, err := cron.QueryDataFromJobsFlow(ctx, req)
 	if err != nil {
 		logx.WithContext(ctx).Error(err)
 		return
@@ -72,8 +73,10 @@ func QueryJob(ctx context.Context, req *common.QueryRealTimeSingleTaskReq) (resp
 	for _, v := range results {
 		resp.Data = append(resp.Data, common.RealTimeSingleTaskData{
 			BaseData: common.BaseData{
-				Id:     v.Id,
-				Status: v.Status,
+				Id:         v.Id,
+				Status:     v.Status,
+				UpdateTime: utils.GetTimeStr(v.UpdateTime),
+				CreateTime: utils.GetTimeStr(v.CreateTime),
 			},
 			RealTimeSingleTask: common.RealTimeSingleTask{
 				Type:     v.Type,
@@ -89,5 +92,7 @@ func QueryJob(ctx context.Context, req *common.QueryRealTimeSingleTaskReq) (resp
 			ResultMsg:  v.ResultMsg,
 		})
 	}
+	resp.Page = req.Page
+	resp.Page.Total = total
 	return
 }
