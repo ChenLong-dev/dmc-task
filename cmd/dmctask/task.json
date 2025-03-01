@@ -184,7 +184,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/QueryTaskConfigResp"
+              "$ref": "#/definitions/QueryCronCycleTaskResp"
             }
           }
         },
@@ -196,6 +196,33 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/QueryCronCycleTaskReq"
+            }
+          }
+        ],
+        "tags": [
+          "croncycletask"
+        ]
+      }
+    },
+    "/v1/cycle/startorstop": {
+      "post": {
+        "operationId": "startorstopCronCycle",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/Response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 启停：启停定时循环任务请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/StartOrStopCronCycleTaskReq"
             }
           }
         ],
@@ -404,12 +431,20 @@
         "status": {
           "type": "integer",
           "format": "int64"
+        },
+        "update_time": {
+          "type": "string"
+        },
+        "create_time": {
+          "type": "string"
         }
       },
       "title": "BaseData",
       "required": [
         "id",
-        "status"
+        "status",
+        "update_time",
+        "create_time"
       ]
     },
     "CronCycleTask": {
@@ -459,6 +494,12 @@
           "type": "integer",
           "format": "int64"
         },
+        "update_time": {
+          "type": "string"
+        },
+        "create_time": {
+          "type": "string"
+        },
         "type": {
           "type": "integer",
           "format": "int64"
@@ -507,6 +548,43 @@
       "title": "DelFixedTimeSingleTaskReq",
       "required": [
         "id"
+      ]
+    },
+    "FilterBase": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "biz_code": {
+          "type": "string"
+        },
+        "biz_id": {
+          "type": "string"
+        },
+        "cron_task_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "default": "4"
+        },
+        "time_type": {
+          "type": "string",
+          "default": "create_time"
+        },
+        "start": {
+          "type": "string"
+        },
+        "end": {
+          "type": "string"
+        }
+      },
+      "title": "FilterBase",
+      "required": [
+        "status",
+        "time_type"
       ]
     },
     "FixedTimeSingleTask": {
@@ -559,6 +637,12 @@
         "status": {
           "type": "integer",
           "format": "int64"
+        },
+        "update_time": {
+          "type": "string"
+        },
+        "create_time": {
+          "type": "string"
         },
         "type": {
           "type": "integer",
@@ -644,6 +728,24 @@
         "id"
       ]
     },
+    "PageBase": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "page": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "page_size": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "PageBase"
+    },
     "PostDemo": {
       "type": "object",
       "properties": {
@@ -724,32 +826,60 @@
     "QueryCronCycleTaskReq": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string"
+        "filter": {
+          "$ref": "#/definitions/FilterBase"
+        },
+        "page": {
+          "$ref": "#/definitions/PageBase"
         }
       },
-      "title": "QueryCronCycleTaskReq"
+      "title": "QueryCronCycleTaskReq",
+      "required": [
+        "filter",
+        "page"
+      ]
+    },
+    "QueryCronCycleTaskResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "msg": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CronCycleTaskData"
+          }
+        },
+        "page": {
+          "$ref": "#/definitions/PageBase"
+        }
+      },
+      "title": "QueryCronCycleTaskResp",
+      "required": [
+        "data",
+        "page"
+      ]
     },
     "QueryFixedTimeSingleTaskReq": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string"
+        "filter": {
+          "$ref": "#/definitions/FilterBase"
         },
-        "status": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "time_horizon": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "limit": {
-          "type": "integer",
-          "format": "int64"
+        "page": {
+          "$ref": "#/definitions/PageBase"
         }
       },
-      "title": "QueryFixedTimeSingleTaskReq"
+      "title": "QueryFixedTimeSingleTaskReq",
+      "required": [
+        "filter",
+        "page"
+      ]
     },
     "QueryFixedTimeSingleTaskResp": {
       "type": "object",
@@ -766,33 +896,32 @@
           "items": {
             "$ref": "#/definitions/FixedTimeSingleTaskData"
           }
+        },
+        "page": {
+          "$ref": "#/definitions/PageBase"
         }
       },
       "title": "QueryFixedTimeSingleTaskResp",
       "required": [
-        "data"
+        "data",
+        "page"
       ]
     },
     "QueryRealTimeSingleTaskReq": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string"
+        "filter": {
+          "$ref": "#/definitions/FilterBase"
         },
-        "status": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "time_horizon": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "limit": {
-          "type": "integer",
-          "format": "int64"
+        "page": {
+          "$ref": "#/definitions/PageBase"
         }
       },
-      "title": "QueryRealTimeSingleTaskReq"
+      "title": "QueryRealTimeSingleTaskReq",
+      "required": [
+        "filter",
+        "page"
+      ]
     },
     "QueryRealTimeSingleTaskResp": {
       "type": "object",
@@ -809,33 +938,15 @@
           "items": {
             "$ref": "#/definitions/RealTimeSingleTaskData"
           }
+        },
+        "page": {
+          "$ref": "#/definitions/PageBase"
         }
       },
       "title": "QueryRealTimeSingleTaskResp",
       "required": [
-        "data"
-      ]
-    },
-    "QueryTaskConfigResp": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "msg": {
-          "type": "string"
-        },
-        "data": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CronCycleTaskData"
-          }
-        }
-      },
-      "title": "QueryTaskConfigResp",
-      "required": [
-        "data"
+        "data",
+        "page"
       ]
     },
     "RealTimeSingleTask": {
@@ -883,6 +994,12 @@
         "status": {
           "type": "integer",
           "format": "int64"
+        },
+        "update_time": {
+          "type": "string"
+        },
+        "create_time": {
+          "type": "string"
         },
         "type": {
           "type": "integer",
@@ -941,6 +1058,23 @@
         }
       },
       "title": "Response"
+    },
+    "StartOrStopCronCycleTaskReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "is_start": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "StartOrStopCronCycleTaskReq",
+      "required": [
+        "id",
+        "is_start"
+      ]
     }
   },
   "securityDefinitions": {
