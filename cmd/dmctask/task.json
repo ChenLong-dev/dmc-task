@@ -1,0 +1,1088 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/cron/add": {
+      "post": {
+        "operationId": "addCron",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/Response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 增加：增加定时任务请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddFixedTimeSingleTaskReq"
+            }
+          }
+        ],
+        "tags": [
+          "fixedtimesingletask"
+        ]
+      }
+    },
+    "/v1/cron/del": {
+      "post": {
+        "operationId": "delCron",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/Response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 删除：删除定时任务请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DelFixedTimeSingleTaskReq"
+            }
+          }
+        ],
+        "tags": [
+          "fixedtimesingletask"
+        ]
+      }
+    },
+    "/v1/cron/query": {
+      "post": {
+        "operationId": "queryCron",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/QueryFixedTimeSingleTaskResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 查询：查询定时任务请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/QueryFixedTimeSingleTaskReq"
+            }
+          }
+        ],
+        "tags": [
+          "fixedtimesingletask"
+        ]
+      }
+    },
+    "/v1/cycle/add": {
+      "post": {
+        "operationId": "addCronCycle",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/Response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 增加：创建定时循环任务请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddCronCycleTaskReq"
+            }
+          }
+        ],
+        "tags": [
+          "croncycletask"
+        ]
+      }
+    },
+    "/v1/cycle/del": {
+      "post": {
+        "operationId": "delCronCycle",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/Response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 删除：删除定时循环任务请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DelCronCycleTaskReq"
+            }
+          }
+        ],
+        "tags": [
+          "croncycletask"
+        ]
+      }
+    },
+    "/v1/cycle/mod": {
+      "post": {
+        "operationId": "modCronCycle",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/Response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 修改：修改定时循环任务请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ModCronCycleTaskReq"
+            }
+          }
+        ],
+        "tags": [
+          "croncycletask"
+        ]
+      }
+    },
+    "/v1/cycle/query": {
+      "post": {
+        "operationId": "queryCronCycle",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/QueryCronCycleTaskResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 查询：查询定时循环任务请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/QueryCronCycleTaskReq"
+            }
+          }
+        ],
+        "tags": [
+          "croncycletask"
+        ]
+      }
+    },
+    "/v1/cycle/startorstop": {
+      "post": {
+        "operationId": "startorstopCronCycle",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/Response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 启停：启停定时循环任务请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/StartOrStopCronCycleTaskReq"
+            }
+          }
+        ],
+        "tags": [
+          "croncycletask"
+        ]
+      }
+    },
+    "/v1/demo": {
+      "post": {
+        "operationId": "demo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/Response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 查询：查询实时单任务请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PostDemoReq"
+            }
+          }
+        ],
+        "tags": [
+          "test"
+        ]
+      }
+    },
+    "/v1/job/add": {
+      "post": {
+        "operationId": "addJob",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/Response"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 增加：增加实时单任务请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddRealTimeSingleTaskReq"
+            }
+          }
+        ],
+        "tags": [
+          "realtimesingletask"
+        ]
+      }
+    },
+    "/v1/job/query": {
+      "post": {
+        "operationId": "queryJob",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/QueryRealTimeSingleTaskResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 查询：查询实时单任务请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/QueryRealTimeSingleTaskReq"
+            }
+          }
+        ],
+        "tags": [
+          "realtimesingletask"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "AddCronCycleTaskReq": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "biz_code": {
+          "type": "string"
+        },
+        "cron": {
+          "type": "string"
+        },
+        "exec_path": {
+          "type": "string"
+        },
+        "param": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "ext_info": {
+          "type": "string"
+        }
+      },
+      "title": "AddCronCycleTaskReq"
+    },
+    "AddFixedTimeSingleTaskReq": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "biz_code": {
+          "type": "string"
+        },
+        "biz_id": {
+          "type": "string"
+        },
+        "exec_path": {
+          "type": "string"
+        },
+        "exec_time": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "param": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "ext_info": {
+          "type": "string"
+        }
+      },
+      "title": "AddFixedTimeSingleTaskReq"
+    },
+    "AddRealTimeSingleTaskReq": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "biz_code": {
+          "type": "string"
+        },
+        "biz_id": {
+          "type": "string"
+        },
+        "exec_path": {
+          "type": "string"
+        },
+        "param": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "ext_info": {
+          "type": "string"
+        }
+      },
+      "title": "AddRealTimeSingleTaskReq"
+    },
+    "Base": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "msg": {
+          "type": "string"
+        }
+      },
+      "title": "Base",
+      "required": [
+        "code",
+        "msg"
+      ]
+    },
+    "BaseData": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "update_time": {
+          "type": "string"
+        },
+        "create_time": {
+          "type": "string"
+        }
+      },
+      "title": "BaseData",
+      "required": [
+        "id",
+        "status",
+        "update_time",
+        "create_time"
+      ]
+    },
+    "CronCycleTask": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "biz_code": {
+          "type": "string"
+        },
+        "cron": {
+          "type": "string"
+        },
+        "exec_path": {
+          "type": "string"
+        },
+        "param": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "ext_info": {
+          "type": "string"
+        }
+      },
+      "title": "CronCycleTask",
+      "required": [
+        "type",
+        "biz_code",
+        "cron",
+        "exec_path",
+        "param",
+        "timeout"
+      ]
+    },
+    "CronCycleTaskData": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "update_time": {
+          "type": "string"
+        },
+        "create_time": {
+          "type": "string"
+        },
+        "type": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "biz_code": {
+          "type": "string"
+        },
+        "cron": {
+          "type": "string"
+        },
+        "exec_path": {
+          "type": "string"
+        },
+        "param": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "ext_info": {
+          "type": "string"
+        }
+      },
+      "title": "CronCycleTaskData"
+    },
+    "DelCronCycleTaskReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "title": "DelCronCycleTaskReq",
+      "required": [
+        "id"
+      ]
+    },
+    "DelFixedTimeSingleTaskReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "title": "DelFixedTimeSingleTaskReq",
+      "required": [
+        "id"
+      ]
+    },
+    "FilterBase": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "biz_code": {
+          "type": "string"
+        },
+        "biz_id": {
+          "type": "string"
+        },
+        "cron_task_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "default": "4"
+        },
+        "time_type": {
+          "type": "string",
+          "default": "create_time"
+        },
+        "start": {
+          "type": "string"
+        },
+        "end": {
+          "type": "string"
+        }
+      },
+      "title": "FilterBase",
+      "required": [
+        "status",
+        "time_type"
+      ]
+    },
+    "FixedTimeSingleTask": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "biz_code": {
+          "type": "string"
+        },
+        "biz_id": {
+          "type": "string"
+        },
+        "exec_path": {
+          "type": "string"
+        },
+        "exec_time": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "param": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "ext_info": {
+          "type": "string"
+        }
+      },
+      "title": "FixedTimeSingleTask",
+      "required": [
+        "type",
+        "biz_code",
+        "exec_path",
+        "exec_time",
+        "param",
+        "timeout"
+      ]
+    },
+    "FixedTimeSingleTaskData": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "update_time": {
+          "type": "string"
+        },
+        "create_time": {
+          "type": "string"
+        },
+        "type": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "biz_code": {
+          "type": "string"
+        },
+        "biz_id": {
+          "type": "string"
+        },
+        "exec_path": {
+          "type": "string"
+        },
+        "exec_time": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "param": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "ext_info": {
+          "type": "string"
+        },
+        "start_time": {
+          "type": "string"
+        },
+        "finish_time": {
+          "type": "string"
+        },
+        "interval": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "result_msg": {
+          "type": "string"
+        }
+      },
+      "title": "FixedTimeSingleTaskData",
+      "required": [
+        "start_time",
+        "finish_time",
+        "interval",
+        "result_msg"
+      ]
+    },
+    "ModCronCycleTaskReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "biz_code": {
+          "type": "string"
+        },
+        "cron": {
+          "type": "string"
+        },
+        "exec_path": {
+          "type": "string"
+        },
+        "param": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "ext_info": {
+          "type": "string"
+        }
+      },
+      "title": "ModCronCycleTaskReq",
+      "required": [
+        "id"
+      ]
+    },
+    "PageBase": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "page": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "page_size": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "PageBase"
+    },
+    "PostDemo": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": " 姓名"
+        },
+        "age": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 年龄"
+        },
+        "mobile": {
+          "type": "string",
+          "description": " 手机号码"
+        },
+        "email": {
+          "type": "string",
+          "description": " 邮箱地址"
+        },
+        "date": {
+          "type": "string",
+          "description": " 时间"
+        },
+        "password": {
+          "type": "string",
+          "description": " 密码"
+        },
+        "confimPassword": {
+          "type": "string",
+          "description": " 确认密码"
+        }
+      },
+      "title": "PostDemo",
+      "required": [
+        "name",
+        "age",
+        "date",
+        "password",
+        "confimPassword"
+      ]
+    },
+    "PostDemoReq": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": " 姓名"
+        },
+        "age": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 年龄"
+        },
+        "mobile": {
+          "type": "string",
+          "description": " 手机号码"
+        },
+        "email": {
+          "type": "string",
+          "description": " 邮箱地址"
+        },
+        "date": {
+          "type": "string",
+          "description": " 时间"
+        },
+        "password": {
+          "type": "string",
+          "description": " 密码"
+        },
+        "confimPassword": {
+          "type": "string",
+          "description": " 确认密码"
+        }
+      },
+      "title": "PostDemoReq"
+    },
+    "QueryCronCycleTaskReq": {
+      "type": "object",
+      "properties": {
+        "filter": {
+          "$ref": "#/definitions/FilterBase"
+        },
+        "page": {
+          "$ref": "#/definitions/PageBase"
+        }
+      },
+      "title": "QueryCronCycleTaskReq",
+      "required": [
+        "filter",
+        "page"
+      ]
+    },
+    "QueryCronCycleTaskResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "msg": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CronCycleTaskData"
+          }
+        },
+        "page": {
+          "$ref": "#/definitions/PageBase"
+        }
+      },
+      "title": "QueryCronCycleTaskResp",
+      "required": [
+        "data",
+        "page"
+      ]
+    },
+    "QueryFixedTimeSingleTaskReq": {
+      "type": "object",
+      "properties": {
+        "filter": {
+          "$ref": "#/definitions/FilterBase"
+        },
+        "page": {
+          "$ref": "#/definitions/PageBase"
+        }
+      },
+      "title": "QueryFixedTimeSingleTaskReq",
+      "required": [
+        "filter",
+        "page"
+      ]
+    },
+    "QueryFixedTimeSingleTaskResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "msg": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FixedTimeSingleTaskData"
+          }
+        },
+        "page": {
+          "$ref": "#/definitions/PageBase"
+        }
+      },
+      "title": "QueryFixedTimeSingleTaskResp",
+      "required": [
+        "data",
+        "page"
+      ]
+    },
+    "QueryRealTimeSingleTaskReq": {
+      "type": "object",
+      "properties": {
+        "filter": {
+          "$ref": "#/definitions/FilterBase"
+        },
+        "page": {
+          "$ref": "#/definitions/PageBase"
+        }
+      },
+      "title": "QueryRealTimeSingleTaskReq",
+      "required": [
+        "filter",
+        "page"
+      ]
+    },
+    "QueryRealTimeSingleTaskResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "msg": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RealTimeSingleTaskData"
+          }
+        },
+        "page": {
+          "$ref": "#/definitions/PageBase"
+        }
+      },
+      "title": "QueryRealTimeSingleTaskResp",
+      "required": [
+        "data",
+        "page"
+      ]
+    },
+    "RealTimeSingleTask": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "biz_code": {
+          "type": "string"
+        },
+        "biz_id": {
+          "type": "string"
+        },
+        "exec_path": {
+          "type": "string"
+        },
+        "param": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "ext_info": {
+          "type": "string"
+        }
+      },
+      "title": "RealTimeSingleTask",
+      "required": [
+        "type",
+        "biz_code",
+        "exec_path",
+        "param",
+        "timeout"
+      ]
+    },
+    "RealTimeSingleTaskData": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "update_time": {
+          "type": "string"
+        },
+        "create_time": {
+          "type": "string"
+        },
+        "type": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "biz_code": {
+          "type": "string"
+        },
+        "biz_id": {
+          "type": "string"
+        },
+        "exec_path": {
+          "type": "string"
+        },
+        "param": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "ext_info": {
+          "type": "string"
+        },
+        "start_time": {
+          "type": "string"
+        },
+        "finish_time": {
+          "type": "string"
+        },
+        "interval": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "result_msg": {
+          "type": "string"
+        }
+      },
+      "title": "RealTimeSingleTaskData",
+      "required": [
+        "start_time",
+        "finish_time",
+        "interval",
+        "result_msg"
+      ]
+    },
+    "Response": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "msg": {
+          "type": "string"
+        }
+      },
+      "title": "Response"
+    },
+    "StartOrStopCronCycleTaskReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "is_start": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "StartOrStopCronCycleTaskReq",
+      "required": [
+        "id",
+        "is_start"
+      ]
+    }
+  },
+  "securityDefinitions": {
+    "apiKey": {
+      "type": "apiKey",
+      "description": "Enter JWT Bearer token **_only_**",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

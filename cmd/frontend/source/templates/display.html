@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>任务管理系统</title>
+    <style>
+        /* 基础样式 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        /* 导航选项卡 */
+        .nav-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab-item {
+            padding: 12px 30px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+            transition: all 0.3s;
+        }
+
+        .tab-item.active {
+            background-color: #fff;
+            border-color: #007bff;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        /* 内容区域 */
+        .tab-content {
+            display: none;
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 0 4px 4px 4px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 搜索表单 */
+        .search-form {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-form input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-form button {
+            padding: 8px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<!-- 导航选项卡 -->
+<div class="nav-tabs">
+    <div class="tab-item active" onclick="switchTab('immediate')">即时任务</div>
+    <div class="tab-item" onclick="switchTab('scheduled')">定时任务</div>
+    <div class="tab-item" onclick="switchTab('recurring')">定时循环任务</div>
+    <div class="tab-item" onclick="switchTab('details')">任务执行详情</div>
+</div>
+
+<!-- 即时任务内容 -->
+<div id="immediate" class="tab-content active">
+    <div class="search-form">
+        <input type="text" placeholder="任务ID">
+        <input type="datetime-local" placeholder="开始时间">
+        <input type="datetime-local" placeholder="结束时间">
+        <button onclick="searchTasks('immediate')">查询</button>
+    </div>
+    <table>
+        <thead>
+        <tr>
+            <th>任务ID</th>
+            <th>业务code</th>
+            <th>业务ID</th>
+            <th>执行状态</th>
+            <th>执行方式</th>
+            <th>执行结果</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- 数据行示例 -->
+        <tr>
+            <td>1001</td>
+            <td>BIZ001</td>
+            <td>2023-001</td>
+            <td>已完成</td>
+            <td>自动</td>
+            <td>成功</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- 定时任务内容 -->
+<div id="scheduled" class="tab-content">
+    <!-- 内容结构同上... -->
+</div>
+
+<!-- 定时循环任务内容 -->
+<div id="recurring" class="tab-content">
+    <!-- 内容结构同上... -->
+</div>
+
+<!-- 任务执行详情 -->
+<div id="details" class="tab-content">
+    <div class="search-form">
+        <input type="text" placeholder="任务ID">
+        <input type="datetime-local">
+        <button onclick="searchDetails()">查询</button>
+    </div>
+    <table>
+        <thead>
+        <tr>
+            <th>任务ID</th>
+            <th>定时任务ID</th>
+            <th>任务类型</th>
+            <th>业务code</th>
+            <th>业务ID</th>
+            <th>执行状态</th>
+            <th>执行方式</th>
+            <th>执行结果</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- 数据行示例 -->
+        <tr>
+            <td>2001</td>
+            <td>SCH-1001</td>
+            <td>定时任务</td>
+            <td>BIZ002</td>
+            <td>2023-002</td>
+            <td>进行中</td>
+            <td>手动</td>
+            <td>-</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // 选项卡切换功能
+    function switchTab(tabId) {
+        // 移除所有激活状态
+        document.querySelectorAll('.tab-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+
+        // 添加新的激活状态
+        document.querySelector(`[onclick="switchTab('${tabId}')"]`).classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+    }
+
+    // 搜索功能（需对接后端）
+    function searchTasks(type) {
+        console.log(`搜索${type}任务`);
+        // 这里可以添加AJAX请求
+    }
+
+    function searchDetails() {
+        console.log("搜索执行详情");
+        // 这里可以添加AJAX请求
+    }
+</script>
+</body>
+</html>

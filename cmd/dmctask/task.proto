@@ -1,0 +1,191 @@
+syntax = "proto3";
+
+// protoc --go_out=./grpc/task --go_opt=paths=source_relative --go-grpc_out=./grpc/task --go-grpc_opt=paths=source_relative task.proto
+// protoc-gen-go 版本大于1.4.0, proto文件需要加上go_package,否则无法生成
+option go_package = "./;proto";
+
+message Base {
+  int32 code = 1;
+  string msg = 2;
+}
+
+message BaseData {
+  string id = 1;
+  int64 status = 2;
+  string update_time = 3;
+  string create_time = 4;
+}
+
+message Response {
+  Base base = 1;
+}
+
+message FilterBase {
+  string id = 1;
+  string biz_code = 2;
+  string biz_id = 3;
+  string cron_task_id = 4;
+  int64 status = 5;
+  string time_type = 6;
+  string start = 7;
+  string end = 8;
+}
+
+message PageBase {
+  int64 total = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+}
+
+// ================================================
+// 定时循环任务属性
+message CronCycleTask {
+  int64 type = 1;
+  string biz_code = 2;
+  string cron = 3;
+  string exec_path = 4;
+  string param = 5;
+  int32 timeout = 6;
+  string ext_info = 7;
+}
+
+// 增加：创建定时循环任务请求
+message AddCronCycleTaskReq {
+  CronCycleTask task = 1;
+}
+
+// 删除：删除定时循环任务请求
+message DelCronCycleTaskReq {
+  string id = 1;
+}
+
+// 修改：修改定时循环任务请求
+message ModCronCycleTaskReq {
+  string id = 1;
+  CronCycleTask task = 2;
+}
+
+// 启停：修改定时循环任务启停状态请求
+message StartOrStopCronCycleTaskReq {
+  string id = 1;
+  bool is_start = 2;
+}
+
+// 查询：查询定时循环任务请求
+message QueryCronCycleTaskReq {
+  FilterBase filter = 1;
+  PageBase page = 2;
+}
+
+message CronCycleTaskData {
+  BaseData base = 1;
+  CronCycleTask task = 2;
+}
+
+message QueryCronCycleTaskResp {
+  Base base = 1;
+  repeated CronCycleTaskData data = 2;
+  PageBase page = 3;
+}
+
+// ================================================
+// 固定时间单任务属性
+message FixedTimeSingleTask {
+  int64 type = 1;
+  string biz_code = 2;
+  string biz_id = 3;
+  string exec_path = 4;
+  int64 exec_time = 5;
+  string param = 6;
+  int32 timeout = 7;
+  string ext_info = 8;
+}
+
+// 增加：增加定时任务请求
+message AddFixedTimeSingleTaskReq {
+  FixedTimeSingleTask task = 1;
+}
+
+// 删除：删除定时任务请求
+message DelFixedTimeSingleTaskReq {
+  string id = 1;
+}
+
+// 查询：查询定时任务请求
+message QueryFixedTimeSingleTaskReq {
+  FilterBase filter = 1;
+  PageBase page = 2;
+}
+
+// 查询：查询定时任务应答
+message FixedTimeSingleTaskData {
+  BaseData base = 1;
+  FixedTimeSingleTask task = 2;
+  string start_time = 3;
+  string finish_time = 4;
+  int64 interval = 5;
+  string result_msg = 6;
+}
+
+message QueryFixedTimeSingleTaskResp {
+  Base base = 1;
+  repeated FixedTimeSingleTaskData data = 2;
+  PageBase page = 3;
+}
+
+// ================================================
+// 实时单任务属性
+message RealTimeSingleTask {
+  int64 type = 1;
+  string biz_code = 2;
+  string biz_id = 3;
+  string exec_path = 4;
+  string param = 5;
+  int32 timeout = 6;
+  string ext_info = 7;
+}
+
+message AddRealTimeSingleTaskReq {
+  RealTimeSingleTask task = 1;
+}
+
+message QueryRealTimeSingleTaskReq {
+  FilterBase filter = 1;
+  PageBase page = 2;
+}
+
+message RealTimeSingleTaskData {
+  BaseData base = 1;
+  RealTimeSingleTask task = 2;
+  string start_time = 3;
+  string finish_time = 4;
+  int64 interval = 5;
+  string result_msg = 6;
+}
+
+message QueryRealTimeSingleTaskResp {
+  Base base = 1;
+  repeated RealTimeSingleTaskData data = 2;
+  PageBase page = 3;
+}
+
+// ================================================
+
+service Task {
+  // 定时循环任务
+  rpc AddCronCycleTask (AddCronCycleTaskReq) returns (Response);
+  rpc DelCronCycleTask (DelCronCycleTaskReq) returns (Response);
+  rpc ModCronCycleTask (ModCronCycleTaskReq) returns (Response);
+  rpc StartOrStopCronCycleTask (StartOrStopCronCycleTaskReq) returns (Response);
+  rpc QueryCronCycleTask (QueryCronCycleTaskReq) returns (QueryCronCycleTaskResp);
+
+  // 固定时间单任务
+  rpc AddFixedTimeSingleTask (AddFixedTimeSingleTaskReq) returns (Response);
+  rpc DelFixedTimeSingleTask (DelFixedTimeSingleTaskReq) returns (Response);
+  rpc QueryFixedTimeSingleTask (QueryFixedTimeSingleTaskReq) returns (QueryFixedTimeSingleTaskResp);
+
+  // 实时单任务
+  rpc AddRealTimeSingleTask (AddRealTimeSingleTaskReq) returns (Response);
+  rpc QueryRealTimeSingleTask (QueryRealTimeSingleTaskReq) returns (QueryRealTimeSingleTaskResp);
+
+}

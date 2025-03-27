@@ -1,0 +1,54 @@
+app:
+  # 应用名称
+  name: dmc-task
+  # 应用运行模式，默认是 dev，[dev/prod]
+  mode: dev
+  # 应用版本
+  version: 1.0.0
+  # 是否开启分布式，默认是 false，[true/false]
+  is_distributed: false
+
+apiserver:
+  enabled: true
+  host: 0.0.0.0
+  port: 7888
+
+grpcserver:
+  enabled: true
+  host: 0.0.0.0
+  port: 7889
+
+logx:
+  # 输出日志的模式，默认是 console, [console/file/volume]
+  mode: file
+  # 日志编码，默认是 json，[json, plain]
+  encoding: plain
+  # 日志路径，默认为 logs
+  path: logs
+  # 用于过滤日志的日志级别。默认为 info，[debug/info/error/servere]
+  level: info
+  # 日志文件将被保留多少天。默认情况下保留所有文件。 仅在模式为“file”或“volume”时生效，当rotation方式为“daily”或“size”时均有效。
+  keep_days: 7
+  # 将保留多少个备份日志文件。0 表示所有文件将永久保留。 仅在rotation规则类型为“size”时生效。 即使 max_backups 设置为 0，当达到 KeepDays 限制时，日志文件仍会被删除。
+  max_backups: 3
+  # 写入日志文件所占用的空间大小。0 表示没有限制。单位为“MB”。 仅在rotation规则类型为“size”时生效。
+  max_size: 500
+  # 旋转表示日志旋转规则的类型。默认是“每日”。[daily/size]
+  rotation: size
+
+mysql:
+  # mysql连接地址
+  host: 10.30.4.229
+  # mysql连接端口
+  port: 3306
+  # mysql连接用户名
+  username: root
+  # mysql连接密码
+  password: Shanhai*123
+  # mysql连接数据库名
+  database: dmc_task
+  # mysql连接字符集
+  charset: utf8mb4
+  # mysql连接的超时时间
+  timeout: 10
+

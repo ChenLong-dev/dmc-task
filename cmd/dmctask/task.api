@@ -1,0 +1,247 @@
+syntax = "v1"
+
+// goctl api go -api task.api --dir ./api --style=gozero --home ../../goctl
+type Base {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+}
+
+type BaseData {
+	Id         string `json:"id"`
+	Status     int64  `json:"status"`
+	UpdateTime string `json:"update_time"`
+	CreateTime string `json:"create_time"`
+}
+
+type Response {
+	Base
+}
+
+type FilterBase {
+	Id         string `json:"id,optional"`
+	BizCode    string `json:"biz_code,optional"`
+	BizId      string `json:"biz_id,optional"`
+	CronTaskId string `json:"cron_task_id,optional"`
+	Status     int64  `json:"status,default=4" validate:"oneof=-4 -3 -2 -1 0 1 2 3 4"`
+	TimeType   string `json:"time_type,default=create_time" validate:"oneof=create_time update_time start_time finish_time"`
+	Start      string `json:"start,optional" validate:"omitempty,checkDate"`
+	End        string `json:"end,optional" validate:"omitempty,checkDate"`
+}
+
+type PageBase {
+	Total    int64 `json:"total,optional"`
+	Page     int64 `json:"page,optional"`
+	PageSize int64 `json:"page_size,optional"`
+}
+
+// ================================================
+// 定时循环任务属性
+type CronCycleTask {
+	Type     int64  `json:"type" validate:"required,min=1,max=3"`
+	BizCode  string `json:"biz_code" validate:"required"`
+	Cron     string `json:"cron" validate:"required"`
+	ExecPath string `json:"exec_path" validate:"required"`
+	Param    string `json:"param" validate:"required"`
+	Timeout  int64  `json:"timeout" validate:"required,min=5"`
+	ExtInfo  string `json:"ext_info,optional"`
+}
+
+// 增加：创建定时循环任务请求
+type AddCronCycleTaskReq {
+	CronCycleTask
+}
+
+// 删除：删除定时循环任务请求
+type DelCronCycleTaskReq {
+	Id string `json:"id" validate:"required"`
+}
+
+// 修改：修改定时循环任务请求
+type ModCronCycleTaskReq {
+	Id string `json:"id" validate:"required"`
+	CronCycleTask
+}
+
+// 启停：启停定时循环任务请求
+type StartOrStopCronCycleTaskReq {
+	Id      string `json:"id" validate:"required"`
+	IsStart bool   `json:"is_start"`
+}
+
+// 查询：查询定时循环任务请求
+type QueryCronCycleTaskReq {
+	Filter FilterBase `json:"filter" validate:"required"`
+	Page   PageBase   `json:"page" validate:"required"`
+}
+
+// 查询：查询定时循环任务应答
+type CronCycleTaskData {
+	BaseData
+	CronCycleTask
+}
+
+type QueryCronCycleTaskResp {
+	Base
+	Data []CronCycleTaskData `json:"data"`
+	Page PageBase            `json:"page"`
+}
+
+// ================================================
+// 固定时间单任务属性
+type FixedTimeSingleTask {
+	Type     int64  `json:"type" validate:"required,min=1,max=3"`
+	BizCode  string `json:"biz_code" validate:"required"`
+	BizId    string `json:"biz_id,optional"`
+	ExecPath string `json:"exec_path" validate:"required"`
+	ExecTime int64  `json:"exec_time" validate:"required"`
+	Param    string `json:"param" validate:"required"`
+	Timeout  int64  `json:"timeout" validate:"required,min=5"`
+	ExtInfo  string `json:"ext_info,optional"`
+}
+
+// 增加：增加定时任务请求
+type AddFixedTimeSingleTaskReq {
+	FixedTimeSingleTask
+}
+
+// 删除：删除定时任务请求
+type DelFixedTimeSingleTaskReq {
+	Id string `json:"id" validate:"required"`
+}
+
+// 查询：查询定时任务请求
+type QueryFixedTimeSingleTaskReq {
+	Filter FilterBase `json:"filter" validate:"required"`
+	Page   PageBase   `json:"page" validate:"required"`
+}
+
+// 查询：查询定时任务应答
+type FixedTimeSingleTaskData {
+	BaseData
+	FixedTimeSingleTask
+	StartTime  string `json:"start_time"`
+	FinishTime string `json:"finish_time"`
+	Interval   int64  `json:"interval"`
+	ResultMsg  string `json:"result_msg"`
+}
+
+type QueryFixedTimeSingleTaskResp {
+	Base
+	Data []FixedTimeSingleTaskData `json:"data"`
+	Page PageBase                  `json:"page"`
+}
+
+// ================================================
+// 实时单任务属性
+type RealTimeSingleTask {
+	Type     int64  `json:"type" validate:"required,min=1,max=3"`
+	BizCode  string `json:"biz_code" validate:"required"`
+	BizId    string `json:"biz_id,optional"`
+	ExecPath string `json:"exec_path" validate:"required"`
+	Param    string `json:"param" validate:"required"`
+	Timeout  int64  `json:"timeout" validate:"required,min=5"`
+	ExtInfo  string `json:"ext_info,optional"`
+}
+
+// 增加：增加实时单任务请求
+type AddRealTimeSingleTaskReq {
+	RealTimeSingleTask
+}
+
+// 查询：查询实时单任务请求
+type QueryRealTimeSingleTaskReq {
+	Filter FilterBase `json:"filter" validate:"required"`
+	Page   PageBase   `json:"page" validate:"required"`
+}
+
+// 查询：查询实时单任务应答
+type RealTimeSingleTaskData {
+	BaseData
+	RealTimeSingleTask
+	StartTime  string `json:"start_time"`
+	FinishTime string `json:"finish_time"`
+	Interval   int64  `json:"interval"`
+	ResultMsg  string `json:"result_msg"`
+}
+
+type QueryRealTimeSingleTaskResp {
+	Base
+	Data []RealTimeSingleTaskData `json:"data"`
+	Page PageBase                 `json:"page"`
+}
+
+// ================================================
+// test
+type PostDemo {
+	Name           string `json:"name" validate:"required"` // 姓名
+	Age            int64  `json:"age" validate:"required,gte=1,lte=130"` // 年龄
+	Mobile         string `json:"mobile,optional" validate:"omitempty,checkMobile"` // 手机号码
+	Email          string `json:"email,optional" validate:"omitempty,checkEmail"` // 邮箱地址
+	Date           string `json:"date" validate:"omitempty,checkDate,checkAfterDate"` // 时间
+	Password       string `json:"password" validate:"required"` // 密码
+	ConfimPassword string `json:"confimPassword" validate:"eqfield=Password"` // 确认密码
+}
+
+// 查询：查询实时单任务请求
+type PostDemoReq {
+	PostDemo
+}
+
+// ================================================
+@server (
+	group:  test
+	prefix: v1
+)
+service task-api {
+	@handler demo
+	post /demo (PostDemoReq) returns (Response)
+}
+
+@server (
+	group:  croncycletask
+	prefix: v1
+)
+service task-api {
+	@handler addCronCycle
+	post /cycle/add (AddCronCycleTaskReq) returns (Response)
+
+	@handler delCronCycle
+	post /cycle/del (DelCronCycleTaskReq) returns (Response)
+
+	@handler modCronCycle
+	post /cycle/mod (ModCronCycleTaskReq) returns (Response)
+
+	@handler startorstopCronCycle
+	post /cycle/startorstop (StartOrStopCronCycleTaskReq) returns (Response)
+
+	@handler queryCronCycle
+	post /cycle/query (QueryCronCycleTaskReq) returns (QueryCronCycleTaskResp)
+}
+
+@server (
+	group:  fixedtimesingletask
+	prefix: v1
+)
+service task-api {
+	@handler addCron
+	post /cron/add (AddFixedTimeSingleTaskReq) returns (Response)
+
+	@handler delCron
+	post /cron/del (DelFixedTimeSingleTaskReq) returns (Response)
+
+	@handler queryCron
+	post /cron/query (QueryFixedTimeSingleTaskReq) returns (QueryFixedTimeSingleTaskResp)
+}
+
+@server (
+	group:  realtimesingletask
+	prefix: v1
+)
+service task-api {
+	@handler addJob
+	post /job/add (AddRealTimeSingleTaskReq) returns (Response)
+
+	@handler queryJob
+	post /job/query (QueryRealTimeSingleTaskReq) returns (QueryRealTimeSingleTaskResp)
+}
+
